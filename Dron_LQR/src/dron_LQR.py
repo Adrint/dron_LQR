@@ -62,7 +62,7 @@ elif n == 8:
 u = np.zeros((m,)) #jednowymiarowa tablica sterowania
 
 # Parametry symulacji
-Vel = 0.10  # zadana prędkość pozioma
+Vel = 0.10  # zadana prędkość pozioma poczatkowa 0.1
 dt = 0.01   # krok czasowy
 t = 0.0     # czas początkowy
 
@@ -102,12 +102,12 @@ for i in range(10000):
     R = np.eye(m) #macierze jednostkowa 2x2
     Q = np.eye(n) #macierze jednostkowa 6x6 lub 8x8
 
-    Q[0, 0] = 1000.0  # duża kara za błąd prędkości X
-    Q[1, 1] = 1000.0  # błąd prędkości Z
-    Q[2, 2] = 0.1
-    Q[3, 3] = 10.0  # błąd pozycji X
-    Q[4, 4] = 100.0  # błąd wysokości Z
-    Q[5, 5] = 1000.0  # orientacja (kąt)
+    Q[0, 0] = 100.0  # duża kara za błąd prędkości X
+    Q[1, 1] = 100.0  # błąd prędkości Z
+    Q[2, 2] = 0.1     # błąd omega
+    Q[3, 3] = 100.0  # błąd pozycji X
+    Q[4, 4] = 1000.0  # błąd wysokości Z
+    Q[5, 5] = 10.0  # orientacja (kąt)
     if n == 8:
         Q *= 1000  # zwiększenie wag przy dodatkowych stanach
 
@@ -122,8 +122,6 @@ for i in range(10000):
 
     # Linearyzacja modelu
     A, B = aa_matrices_AB(aa_rhs, x, t, u, n, m)
-
-    '''END'''
 
 
     # Rozwiązanie równania Riccatiego
@@ -190,7 +188,9 @@ for i in range(10000):
         plt.plot(x[3], -x[4], 'bo', label="current position")
         plt.plot(xs[:5], zs[:5], 'k', linewidth=3, label="aircraft shape")
         plt.title("Flight trajectory")
-        plt.axis([0, 5, 0, 8])
+        plt.axis([0, 3, 0, 8])
+        plt.xlabel("Position [m]")
+        plt.ylabel("Altitude [m]")
         plt.legend()
         plt.grid()
 
@@ -235,6 +235,3 @@ for i in range(10000):
 
 # Pokazanie końcowego wykresu
 plt.show()
-
-# plot_cost(tp, cost_vals)
-# plot_error_norm(tp, error_norms)

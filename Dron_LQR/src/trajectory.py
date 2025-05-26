@@ -15,7 +15,6 @@ def aa_trajectory(X, Vel, dt):
     """
 
     def Z_at(x):
-        # Funkcja pomocnicza: definicja wysokości terenu w zależności od pozycji X
         if x <= 1.0:
             return 1.0
         elif 1.0 < x < 1.5:
@@ -24,10 +23,24 @@ def aa_trajectory(X, Vel, dt):
             return 6.0  # płaskowyż
         elif 2.0 < x <= 2.5:
             return 6.0 - (x - 2.0) * 10.0  # strome zejście
-        else:
-            return 1.0  # płaskie zakończenie
+        elif 2.5 < x <= 3.0:
+            return 1.0
+        # ▶️ Od tego miejsca teren się zmienia ciekawiej:
 
-    
+        # elif 2.5 < x <= 4.0:
+        #     return 2.0 + 10.0 * np.exp(-((x - 3.0) ** 2) / 0.1)  # wieżowiec jak dzwon Gaussa
+        #
+        # elif 4.0 < x <= 5.5:
+        #     return -((x - 4.75) ** 2) + 7.0  # parabola (szczyt w x=4.75, wysokość 7)
+        #
+        # elif 5.5 < x <= 6.5:
+        #     return 2.0 + 1.5 * np.sin((x - 5.5) * np.pi)  # dół: sinusoidalna dolina
+        #
+        # elif 6.5 < x <= 8.0:
+        #     return 3.0 + 0.5 * np.sin(3 * (x - 6.5))  # łagodna fala
+
+        else:
+            return 1.0  # zakończenie na wysokości 3
 
     Z1 = Z_at(X)  # aktualna wysokość terenu
     dx = Vel * dt  # mała zmiana w X
