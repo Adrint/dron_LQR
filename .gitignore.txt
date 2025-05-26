@@ -1,0 +1,22 @@
+# Środowiska virtualenv
+.venv/
+venv/
+
+# PyCharm / VSCode
+.idea/
+.vscode/
+
+# Pliki cache Pythona
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pliki logów / temp
+*.log
+*.tmp
+*.swp
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
