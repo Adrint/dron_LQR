@@ -10,6 +10,7 @@ from scipy.linalg import solve_continuous_are  # rozwiązywanie równania Riccat
 from rk45 import aa_rk45  # solver RK45
 # Globalne zmienne
 from rhs import az_turbulence, ax_wind, az_wind  # zakłócenia środowiskowe
+from plot import plot_cost, plot_error_norm
 
 '''
 Symulacja lotu drona:
@@ -70,6 +71,11 @@ tp, gp, zp = [], [], []  # czas, teren, referencja
 yp = []  # wektory stanu
 up = []  # sterowania
 
+#Wartosci kosztow i bledow
+cost_vals = []
+error_norms = []
+
+
 # Główna pętla symulacji
 for i in range(10000):
     if t >= 100.0:
@@ -126,6 +132,11 @@ for i in range(10000):
     K, P = lqr_with_cross_term(A, B, Q, R)
     u = -K @ e  # jak mocno zaregować na macierz błedow
 
+    # funkcja kosztu
+    J = e.T @ Q @ e + u.T @ R @ u
+    cost_vals.append(J)
+    error_norms.append(np.linalg.norm(e))
+
     # Ograniczenie sterowania
     umax = 10000.0
     u = np.clip(u, -umax, umax)
@@ -156,20 +167,74 @@ for i in range(10000):
 
         xs, zs = aa_mdl(x[3], -x[4], x[5], 0.5)  # model drona
 
-        plt.figure(1, figsize=(12, 7))
-        txt = f"t={t:.3f} V={V:.5f} v_x={v_x:.5f} v_z={v_z:.5f} teta={teta:.5f} alfa={alfa*rad2deg:.5f} ||| u1={T1:.4f} u2={T2:.4f} ||| e_v={e_v:.5f} e(z)={e[4]:.5f}"
+        # plt.figure(1, figsize=(12, 7))
+        # txt = f"t={t:.3f} V={V:.5f} v_x={v_x:.5f} v_z={v_z:.5f} teta={teta:.5f} alfa={alfa*rad2deg:.5f} ||| u1={T1:.4f} u2={T2:.4f} ||| e_v={e_v:.5f} e(z)={e[4]:.5f}"
+        # plt.clf()
+        # plt.plot([x[3] for x in yp], zp, 'r', label="z_ref")
+        # plt.plot([x[3] for x in yp], gp, 'g', label="terrain")
+        # plt.plot([x[3] for x in yp], [-x[4] for x in yp], 'b', label="flight path")
+        # plt.plot(x[3], -x[4], 'bo', label="current position")
+        # plt.plot(xs[:5], zs[:5], 'k', linewidth=3, label="aircraft shape")
+        # plt.title(txt)
+        # plt.axis([0, 5, 0, 8])
+        # plt.legend()
+        # plt.pause(0.01)
+        plt.figure(1, figsize=(14, 10))
         plt.clf()
+
+        # 1. Wykres trajektorii lotu
+        plt.subplot(2, 2, 1)
         plt.plot([x[3] for x in yp], zp, 'r', label="z_ref")
         plt.plot([x[3] for x in yp], gp, 'g', label="terrain")
         plt.plot([x[3] for x in yp], [-x[4] for x in yp], 'b', label="flight path")
         plt.plot(x[3], -x[4], 'bo', label="current position")
         plt.plot(xs[:5], zs[:5], 'k', linewidth=3, label="aircraft shape")
-        plt.title(txt)
+        plt.title("Flight trajectory")
         plt.axis([0, 5, 0, 8])
         plt.legend()
+        plt.grid()
+
+        # 2. Koszt LQR
+        plt.subplot(2, 2, 2)
+        plt.plot(tp, cost_vals, label="LQR cost", color="purple")
+        plt.xlabel("Time [s]")
+        plt.ylabel("Cost")
+        plt.title("LQR cost function")
+        plt.grid()
+        plt.legend()
+
+        # 3. Norma błędu
+        plt.subplot(2, 2, 3)
+        plt.plot(tp, error_norms, label="||e||", color="orange")
+        plt.xlabel("Time [s]")
+        plt.ylabel("Error norm")
+        plt.title("State error norm")
+        plt.grid()
+        plt.legend()
+
+        # 4. Ciągi silników
+        plt.subplot(2, 2, 4)
+        u1_vals = [u_[0] for u_ in up]
+        u2_vals = [u_[1] for u_ in up]
+        plt.plot(tp, u1_vals, label="u1 (Thrust 1)")
+        plt.plot(tp, u2_vals, label="u2 (Thrust 2)")
+        plt.xlabel("Time [s]")
+        plt.ylabel("Control [N]")
+        plt.title("Thrust commands")
+        plt.grid()
+        plt.legend()
+
+        # Tytuł całości
+        txt = f"t={t:.2f}s | V={V:.3f} | θ={teta:.2f}° | u1={T1:.1f}, u2={T2:.1f} | e(z)={e[4]:.3f}"
+        plt.suptitle(txt, fontsize=10)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
         plt.pause(0.01)
 
     t += dt  # aktualizacja czasu
 
 # Pokazanie końcowego wykresu
 plt.show()
+
+# plot_cost(tp, cost_vals)
+# plot_error_norm(tp, error_norms)

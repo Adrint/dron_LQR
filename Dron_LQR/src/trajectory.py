@@ -27,6 +27,8 @@ def aa_trajectory(X, Vel, dt):
         else:
             return 1.0  # płaskie zakończenie
 
+    
+
     Z1 = Z_at(X)  # aktualna wysokość terenu
     dx = Vel * dt  # mała zmiana w X
     Z2 = Z_at(X + dx)  # przyszła wysokość terenu
