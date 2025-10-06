@@ -1,0 +1,16 @@
+sterowanie optymalne 
+sterowanie LQR
+
+potem możliwa siec neuronowa
+przypomnieć się o model 
+
+model dwuwymiarowy (model zerowy)
+leci w płaszczyźnie pionowej, może się wznosić i opadać
+
+zdefiniować ścieżka po której ma się poruszać
+
+
+
+wyznaczyć trajektorie (do rozważenia)
+
+Sterowanie optymalne lotem drona
