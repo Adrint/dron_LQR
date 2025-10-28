@@ -1,0 +1,237 @@
+================================================================================
+        STRUKTURA PROJEKTU - SYSTEM PLANOWANIA TRAJEKTORII
+================================================================================
+
+Po instalacji, struktura katalogów powinna wyglądać następująco:
+
+
+D:\Praca_Magisterska_PW\
+│
+├── src_28_10\                          ← Twój OBECNY projekt (NIE ZMIENIAJ!)
+│   ├── dron_lqr_with_orientation.py   ← Główny program drona
+│   ├── trajectory.py                   ← Obecny generator trajektorii
+│   ├── rk45.py
+│   ├── matrices.py
+│   ├── model_draw.py
+│   ├── lqr.py
+│   ├── rhs.py
+│   └── constants.py
+│
+└── path_planning\                      ← NOWY folder (planowanie ścieżki)
+    │
+    ├── main.py                         ★ Program główny (INTERAKTYWNY)
+    │                                     Użyj tego do tworzenia trajektorii!
+    │
+    ├── quick_start.py                  ★ Szybki test systemu
+    │                                     Uruchom aby sprawdzić czy działa
+    │
+    ├── config.py                       ⚙️  Konfiguracja (parametry)
+    ├── obstacles.py                    🏢 Definicje przeszkód
+    ├── path_planner.py                 🧭 Algorytmy (A*, RRT, RRT*)
+    ├── trajectory_export.py            💾 Eksport trajektorii
+    ├── visualization.py                📊 Wizualizacja 2D/3D
+    │
+    ├── requirements.txt                📋 Lista wymaganych bibliotek
+    ├── README.md                       📖 Pełna dokumentacja
+    ├── .gitignore                      🚫 Pliki do ignorowania
+    │
+    ├── data\                           💿 Dane i wyniki
+    │   ├── generated\                  ← Tutaj są WYGENEROWANE trajektorie
+    │   │   ├── trajectory_output.npz   ← Format NumPy
+    │   │   ├── trajectory_output.json  ← Format JSON
+    │   │   └── custom_trajectory.py    ← Moduł Python (UŻYJ TEGO!)
+    │   │
+    │   ├── obstacles\                  ← Zapisane konfiguracje przeszkód
+    │   └── maps\                       ← Mapy (opcjonalnie, na przyszłość)
+    │
+    └── examples\                       📚 Przykłady użycia
+        └── example_usage.py            ← 5 przykładów programatycznych
+
+
+================================================================================
+JAK TO DZIAŁA - PRZEPŁYW PRACY
+================================================================================
+
+   ┌─────────────────────────────────────────────────────────────┐
+   │                                                               │
+   │  1. PLANOWANIE ŚCIEŻKI (path_planning folder)                │
+   │                                                               │
+   │     python main.py                                           │
+   │         ↓                                                    │
+   │     [Wybór punktów A i B]                                    │
+   │         ↓                                                    │
+   │     [Dodanie przeszkód]                                      │
+   │         ↓                                                    │
+   │     [Wyznaczenie trajektorii A*, RRT, RRT*]                  │
+   │         ↓                                                    │
+   │     [Eksport do pliku]                                       │
+   │                                                               │
+   │  WYJŚCIE: data/generated/custom_trajectory.py                │
+   │                                                               │
+   └─────────────────────────────────────────────────────────────┘
+                                 ↓
+                                 ↓
+   ┌─────────────────────────────────────────────────────────────┐
+   │                                                               │
+   │  2. SYMULACJA DRONA (src_28_10 folder)                       │
+   │                                                               │
+   │     Skopiuj: custom_trajectory.py → trajectory.py            │
+   │         ↓                                                    │
+   │     python dron_lqr_with_orientation.py                     │
+   │         ↓                                                    │
+   │     [Dron leci po wygenerowanej trajektorii]                 │
+   │         ↓                                                    │
+   │     [Wizualizacja lotu + kontroler LQR]                      │
+   │                                                               │
+   └─────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+KLUCZOWE PLIKI
+================================================================================
+
+DO URUCHAMIANIA:
+----------------
+★ path_planning/main.py          - Główny program (interaktywny)
+★ path_planning/quick_start.py   - Szybki test
+★ examples/example_usage.py      - Przykłady programatyczne
+
+
+DO EDYCJI:
+----------
+⚙️  config.py                     - Zmień parametry (prędkość, bezpieczeństwo)
+
+
+WYJŚCIOWE (generowane automatycznie):
+--------------------------------------
+💾 data/generated/trajectory_output.npz      - Format NumPy
+💾 data/generated/trajectory_output.json     - Format JSON  
+💾 data/generated/custom_trajectory.py       - Moduł Python (UŻYJ W DRONIE!)
+
+
+DO INTEGRACJI Z DRONEM:
+-----------------------
+→ custom_trajectory.py  ZASTĘPUJE  → src_28_10/trajectory.py
+
+
+================================================================================
+MODUŁY PROGRAMISTYCZNE
+================================================================================
+
+obstacles.py:
+    - ObstacleManager          Zarządzanie przeszkodami
+    - BoxObstacle              Prostopadłościan (budynek)
+    - CylinderObstacle         Cylinder (drzewo, wieża)
+    - SphereObstacle           Kula (balon)
+
+path_planner.py:
+    - AStarPlanner             Algorytm A*
+    - RRTPlanner               Algorytm RRT
+    - RRTStarPlanner           Algorytm RRT*
+    - create_planner()         Funkcja fabryczna
+
+trajectory_export.py:
+    - TrajectoryExporter       Eksport trajektorii
+    - export_numpy()           Do .npz
+    - export_json()            Do .json
+    - generate_trajectory_function()  Do .py
+
+visualization.py:
+    - PathVisualizer           Wizualizacja
+    - plot_3d()                Widok 3D
+    - plot_2d_projections()    Widoki 2D (XY, XZ, YZ)
+
+
+================================================================================
+PRZYKŁADOWE UŻYCIE
+================================================================================
+
+SCENARIUSZ 1: Szybki test
+--------------------------
+cd path_planning
+python quick_start.py
+
+
+SCENARIUSZ 2: Interaktywne tworzenie trajektorii
+-------------------------------------------------
+cd path_planning
+python main.py
+# Postępuj zgodnie z instrukcjami na ekranie
+
+
+SCENARIUSZ 3: Programatyczne użycie
+------------------------------------
+from obstacles import ObstacleManager
+from path_planner import create_planner
+from trajectory_export import TrajectoryExporter
+
+obstacles = ObstacleManager()
+obstacles.add_box((25, 0, -7.5), (10, 10, 15), "Budynek")
+
+planner = create_planner('astar', obstacles, safety_distance=1.5)
+path = planner.plan((0, 0, -2), (50, 0, -2))
+
+exporter = TrajectoryExporter(velocity=2.0, dt=0.01)
+exporter.export_numpy(path, 'trajectory.npz')
+
+
+SCENARIUSZ 4: Użycie w symulacji drona
+---------------------------------------
+1. Wygeneruj trajektorię (main.py lub quick_start.py)
+2. Skopiuj custom_trajectory.py do src_28_10\trajectory.py
+3. Uruchom: python dron_lqr_with_orientation.py
+
+
+================================================================================
+PARAMETRY KONFIGURACYJNE (config.py)
+================================================================================
+
+DRONE_VELOCITY = 2.0           # Prędkość drona [m/s]
+SAFETY_DISTANCE = 1.5          # Odległość od przeszkód [m]
+GRID_RESOLUTION = 0.5          # Rozdzielczość siatki dla A* [m]
+EXPORT_TIME_STEP = 0.01        # Krok czasowy (MUSI być = dt w dronie!)
+
+RRT_MAX_ITERATIONS = 5000      # Max iteracji dla RRT/RRT*
+RRT_STEP_SIZE = 1.0            # Rozmiar kroku RRT [m]
+RRT_STAR_SEARCH_RADIUS = 3.0   # Promień dla RRT* [m]
+
+
+================================================================================
+FAQ
+================================================================================
+
+Q: Gdzie są wygenerowane pliki?
+A: W folderze: path_planning/data/generated/
+
+Q: Który plik skopiować do projektu drona?
+A: custom_trajectory.py → zastępuje trajectory.py w src_28_10
+
+Q: Jak zmienić prędkość drona?
+A: Edytuj config.py (DRONE_VELOCITY) lub podaj przy uruchamianiu main.py
+
+Q: Czy mogę użyć własnych map?
+A: Na razie system działa z przeszkodami 3D. Integracja z mapami to 
+   przyszła funkcjonalność.
+
+Q: Co jeśli nie znajduje ścieżki?
+A: 1) Zwiększ max_iterations (dla RRT)
+   2) Zmniejsz safety_distance
+   3) Spróbuj innego algorytmu
+   4) Sprawdź czy start/cel nie są w kolizji
+
+Q: Jak dostosować trajektorię do mojego drona?
+A: Parametry velocity i dt w TrajectoryExporter MUSZĄ odpowiadać
+   parametrom w dron_lqr_with_orientation.py
+
+
+================================================================================
+KONTAKT I WSPARCIE
+================================================================================
+
+📖 Pełna dokumentacja:     path_planning/README.md
+📚 Przykłady:              path_planning/examples/example_usage.py
+🚀 Szybki start:           python quick_start.py
+💬 Interaktywny program:   python main.py
+
+
+================================================================================
