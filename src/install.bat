@@ -6,11 +6,11 @@ echo  Instalacja: System Symulacji Drona
 echo ========================================
 echo.
 
-REM Sprawdź Python
+REM Sprawdz Python
 echo Sprawdzam Python...
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo [91mX Python nie jest zainstalowany![0m
+    echo [ERROR] Python nie jest zainstalowany!
     echo.
     echo Pobierz Python 3.8 lub nowszy z:
     echo https://www.python.org/downloads/
@@ -22,39 +22,39 @@ if errorlevel 1 (
 )
 
 for /f "tokens=*" %%i in ('python --version') do set PYTHON_VER=%%i
-echo [92m√[0m %PYTHON_VER%
+echo [OK] %PYTHON_VER%
 
-REM Sprawdź pip
+REM Sprawdz pip
 echo Sprawdzam pip...
 python -m pip --version >nul 2>&1
 if errorlevel 1 (
-    echo [91mX pip nie jest zainstalowany![0m
+    echo [ERROR] pip nie jest zainstalowany!
     echo Instaluje pip...
     python -m ensurepip --upgrade
 )
-echo [92m√[0m pip dostepny
+echo [OK] pip dostepny
 
-REM Utwórz środowisko wirtualne
+REM Utworz srodowisko wirtualne
 echo.
 echo Tworze srodowisko wirtualne...
 if exist "venv\" (
-    echo [93m! Katalog venv juz istnieje[0m
+    echo [WARN] Katalog venv juz istnieje
     set /p response=Czy chcesz go usunac i utworzyc ponownie? (T/N): 
     if /i "%response%"=="T" (
         rd /s /q venv
         python -m venv venv
-        echo [92m√[0m Utworzono nowe srodowisko
+        echo [OK] Utworzono nowe srodowisko
     )
 ) else (
     python -m venv venv
-    echo [92m√[0m Utworzono srodowisko wirtualne
+    echo [OK] Utworzono srodowisko wirtualne
 )
 
-REM Aktywuj środowisko
+REM Aktywuj srodowisko
 echo Aktywuje srodowisko...
 call venv\Scripts\activate.bat
 if errorlevel 1 (
-    echo [91mX Nie udalo sie aktywowac srodowiska[0m
+    echo [ERROR] Nie udalo sie aktywowac srodowiska
     pause
     exit /b 1
 )
@@ -62,16 +62,15 @@ if errorlevel 1 (
 REM Upgrade pip
 echo Aktualizuje pip...
 python -m pip install --upgrade pip >nul 2>&1
-echo [92m√[0m pip zaktualizowany
+echo [OK] pip zaktualizowany
 
-REM Instaluj zależności
+REM Instalacja zaleznosci
 echo.
 echo Instaluje zaleznosci (moze to chwile potrwac)...
 echo Pakiety do zainstalowania:
 type requirements.txt | findstr /v "^#" | findstr /v "^$"
 echo.
 
-REM Specjalne traktowanie dla Windows - instaluj po kolei
 echo Instalowanie pakietow podstawowych...
 pip install numpy scipy matplotlib pandas
 
@@ -83,9 +82,9 @@ pip install geopandas osmnx
 
 if errorlevel 1 (
     echo.
-    echo [91mX Wystapily bledy podczas instalacji[0m
+    echo [ERROR] Wystapily bledy podczas instalacji
     echo.
-    echo Sprobuj zainstalowac recznie problematyczne pakiety:
+    echo Zalecane reczne kroki:
     echo   pip install pipwin
     echo   pipwin install gdal
     echo   pipwin install fiona
@@ -94,41 +93,41 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [92m√[0m Wszystkie pakiety zainstalowane pomyslnie!
+echo [OK] Wszystkie pakiety zainstalowane pomyslnie!
 
-REM Sprawdź kluczowe importy
+REM Weryfikacja importow
 echo.
 echo Weryfikuje instalacje...
-python -c "import numpy; print('√ numpy')"
-python -c "import matplotlib; print('√ matplotlib')"
-python -c "import scipy; print('√ scipy')"
-python -c "import osmnx; print('√ osmnx')"
-python -c "import geopandas; print('√ geopandas')"
+python -c "import numpy; print('[OK] numpy')"
+python -c "import matplotlib; print('[OK] matplotlib')"
+python -c "import scipy; print('[OK] scipy')"
+python -c "import osmnx; print('[OK] osmnx')"
+python -c "import geopandas; print('[OK] geopandas')"
 
 if errorlevel 1 (
-    echo [91mX Blad importu modulow[0m
+    echo [ERROR] Blad importu modulow
     pause
     exit /b 1
 )
 
 echo.
-echo [92m√ Wszystkie kluczowe moduly dostepne[0m
+echo [OK] Wszystkie kluczowe moduly dostepne
 
-REM Utwórz katalog data
+REM Utworz katalog data
 if not exist "src\data\" (
     mkdir src\data
-    echo [92m√[0m Utworzono katalog src\data
+    echo [OK] Utworzono katalog src\data
 )
 
 REM Podsumowanie
 echo.
 echo ========================================
-echo [92m√ Instalacja zakonczona pomyslnie![0m
+echo  Instalacja zakonczona pomyslnie!
 echo ========================================
 echo.
 echo Aby uruchomic program:
 echo   1. Aktywuj srodowisko: venv\Scripts\activate
-echo   2. Uruchom: cd src ^&^& python main.py
+echo   2. Uruchom: cd src && python main.py
 echo.
 echo Lub uzyj skryptu:
 echo   run.bat

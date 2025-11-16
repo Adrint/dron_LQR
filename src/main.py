@@ -20,48 +20,56 @@ def print_header(title):
 def section_1_data_management():
     """SEKCJA 1: Zarządzanie danymi OpenStreetMap."""
 
-    from map_1_data import download_street_network, download_buildings, DATA_DIR
-
     street_network_path = DATA_DIR / "warsaw_street_network.pkl"
     buildings_path = DATA_DIR / "warsaw_buildings.pkl"
 
-    # Sprawdź czy dane istnieją
+    # Sprawdzenie czy dane istnieją
     if street_network_path.exists() and buildings_path.exists():
-        print("\n✓ Znaleziono zapisane dane Warszawy")
+        print("\n Znaleziono zapisane dane Warszawy")
         print(f"  - Sieć drogowa: {street_network_path}")
         print(f"  - Budynki: {buildings_path}")
 
         while True:
             user_input = input("Czy chcesz pobrać dane ponownie? [n]: ").strip().lower()
+
             if user_input in ['t', 'tak', 'y', 'yes']:
-                break  # pobieraj dane – wychodzimy z pętli
+                break  # przejście do pobierania nowych danych
             elif user_input in ['n', 'nie', 'no', '']:
                 try:
                     with open(street_network_path, "rb") as f:
                         G = pickle.load(f)
                     buildings = pd.read_pickle(buildings_path)
-                    print("✓ Wczytano dane z pliku")
+                    print(" Wczytano dane z pliku")
                     return G, buildings
                 except Exception as e:
-                    print(f"✗ Błąd podczas wczytywania danych: {e}")
+                    print(f" Błąd podczas wczytywania danych: {e}")
                     return None, None
             else:
-                print("✗ Nieprawidłowa odpowiedź. Wpisz 't' (tak) lub 'n' (nie).")
+                print("Nieprawidłowa odpowiedź. Wpisz 't' (tak) lub 'n' (nie).")
 
-    print("\n⚠ Rozpoczynanie pobierania danych z OSM...")
+    while True:
+        czy_pobrac = input("Czy chcesz pobrać dane dla miasta Warszawy? [t/n]: ").strip().lower()
 
-    try:
-        G = download_street_network()
-        buildings = download_buildings()
+        if czy_pobrac in ['t', 'tak', 'y', 'yes']:
+            try:
+                G = download_street_network()
+                buildings = download_buildings()
 
-        if G is None or buildings is None:
-            raise RuntimeError("Dane nie zostały pobrane prawidłowo.")
+                if G is None or buildings is None:
+                    raise RuntimeError("Dane nie zostały pobrane prawidłowo.")
 
-        return G, buildings
+                return G, buildings
 
-    except Exception as e:
-        print(f"✗ Błąd podczas pobierania danych: {e}")
-        return None, None
+            except Exception as e:
+                print(f" Błąd podczas pobierania danych: {e}")
+                return None, None
+
+        elif czy_pobrac in ['n', 'nie', 'no', '']:
+            print("Anulowano pobieranie danych.")
+            return None, None
+
+        else:
+            print("Nieprawidłowa odpowiedź. Wpisz 't' (tak) lub 'n' (nie).")
 
 
 def section_2_route_planning(G, buildings):
@@ -75,7 +83,7 @@ def section_2_route_planning(G, buildings):
             choice = input("\nWybór [1]: ").strip()
 
             if choice == "" or choice == "1":
-                print("\n→ Otwieranie interaktywnej mapy...")
+                print("\n Otwieranie interaktywnej mapy...")
                 print("  1. Użyj zoom/pan aby znaleźć obszar")
                 print("  2. Wciśnij SPACJĘ aby włączyć tryb zaznaczania")
                 print("  3. Kliknij punkt A (zielony), potem B (czerwony)")
@@ -86,13 +94,13 @@ def section_2_route_planning(G, buildings):
                     point_a, point_b = selector.run()  # TERAZ run() już zwraca parę punktów
 
                     if point_a is None or point_b is None:
-                        print("✗ Nie wybrano punktów lub wystąpił błąd")
+                        print("Nie wybrano punktów lub wystąpił błąd")
                         return None, None
 
                     return point_a, point_b
 
                 except Exception as e:
-                    print(f"✗ Błąd interaktywnego wyboru punktów: {e}")
+                    print(f"Błąd interaktywnego wyboru punktów: {e}")
                     return None, None
 
             elif choice == "2":
@@ -111,9 +119,9 @@ def section_2_route_planning(G, buildings):
                     return point_a, point_b
 
                 except ValueError:
-                    print("✗ Błąd: współrzędne muszą być liczbami zmiennoprzecinkowymi.")
+                    print("  Błąd: współrzędne muszą być liczbami zmiennoprzecinkowymi.")
                 except Exception as e:
-                    print(f"✗ Nieoczekiwany błąd: {e}")
+                    print(f"  Nieoczekiwany błąd: {e}")
 
             elif choice == "3":
                 # Przykładowe punkty
@@ -125,10 +133,10 @@ def section_2_route_planning(G, buildings):
                 return point_a, point_b
 
             else:
-                print("✗ Nieprawidłowy wybór. Wybierz 1, 2, 3 lub naciśnij Enter.")
+                print("  Nieprawidłowy wybór. Wybierz 1, 2, 3 lub naciśnij Enter.")
 
         except Exception as e:
-            print(f"✗ Wystąpił błąd podczas wyboru opcji: {e}")
+            print(f"  Wystąpił błąd podczas wyboru opcji: {e}")
 
 def section_3_drone_configuration():
     """SEKCJA 3: Wczytanie parametrów drona."""
@@ -165,7 +173,7 @@ def main():
     print_header("SEKCJA 1: DANE OPENSTREETMAP WARSZAWY")
     G, buildings = section_1_data_management()
     if G is None or buildings is None:
-        print("✗ Nie udało się załadować danych. Zakończono.")
+        print("  Nie udało się załadować danych. Zakończono.")
         return
 
     print_header("SEKCJA 2: WYBÓR PUNKTÓW A i B NA MAPIE")

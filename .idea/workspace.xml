@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b7e39d37-5e2b-4fbc-b8d5-aab5ee3b4e82" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_dron_LQR.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_euler.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_matrices_AB.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_mdl.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_rhs.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_rk45.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/aa_trajectory.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/program_matlab_oryginal/lqr_m.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/install.bat" beforeDir="false" afterPath="$PROJECT_DIR$/src/install.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/run.bat" beforeDir="false" afterPath="$PROJECT_DIR$/src/run.bat" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,22 +14,22 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Adrint"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Adrint&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
-    "url": "https://github.com/Adrint/dron_LQR",
-    "accountId": "e1b30530-b397-4325-95c3-b98c3084285a"
+    "url": "https://github.com/Adrint/dron_LQR.git",
+    "accountId": "9be20e8b-75f2-4024-9a7f-0b580a93add4"
   }
 }]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="33tBBgO1gLdMNRf12XAESjojAWo" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -47,7 +40,8 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main"
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true"
   }
 }]]></component>
   <component name="SharedIndexes">
