@@ -189,15 +189,6 @@ sudo apt-get install python3-tk
 brew install python-tk
 ```
 
-## 📊 Przykładowe punkty testowe (Warszawa)
-
-- **Plac Zamkowy → Katedra:**
-  - A: (52.2248, 20.9891)
-  - B: (52.2171, 20.9977)
-
-- **Centrum → Stadion Narodowy:**
-  - A: (52.2297, 21.0122)
-  - B: (52.2396, 21.0464)
 
 ## 📝 Notatki
 
