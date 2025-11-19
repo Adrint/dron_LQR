@@ -1,5 +1,5 @@
 """
-simulation_controller.py
+control_simulation_controller.py
 
 Kontroler stanu symulacji (pauza/stop) bez oddzielnego okna GUI.
 Przyciski są teraz zintegrowane bezpośrednio w matplotlib (map_5_visualization.py).

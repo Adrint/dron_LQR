@@ -13,7 +13,7 @@ def input_float(prompt: str, default: float) -> float:
         try:
             return float(user_input)
         except ValueError:
-            print("✗ Wprowadź poprawną liczbę.")
+            print("Blad: Wprowadz poprawna liczbe.")
 
 
 def input_yes_no(prompt: str, default: bool) -> bool:
@@ -27,7 +27,7 @@ def input_yes_no(prompt: str, default: bool) -> bool:
             return True
         if user_input in ["n", "nie", "no"]:
             return False
-        print("✗ Wprowadź 't' lub 'n'.")
+        print("Blad: Wprowadz 't' lub 'n'.")
 
 
 # ===============================
@@ -65,7 +65,7 @@ DEFAULTS_FLIGHT = {
     "g": 9.81,
     "RO_0": 1.225,
     "velocity": 5.0,
-    "altitude_start": 0.0,          # ujednolicone z promptem
+    "altitude_start": 0.0,
     "altitude_cruise_min": 5.0,
     "altitude_cruise_max": 10.0,
     "altitude_end": 0.0,
@@ -74,10 +74,11 @@ DEFAULTS_FLIGHT = {
     "ay_wind": 0.0,
     "az_wind": 0.0,
     "c_turb": 1000.0,
-    "x_turb_1": 1500.0,
-    "x_turb_2": 2000.0,
+    "s_turb_start": 1500.0,  # Dystans wzdluz trasy - poczatek strefy turbulencji
+    "s_turb_end": 2000.0,    # Dystans wzdluz trasy - koniec strefy turbulencji
     "engine_on": False,
 }
+
 DEFAULTS_CONTROL = {
     "Q_velocity_x": 20.0,
     "Q_velocity_y": 20.0,
@@ -127,67 +128,67 @@ def drone_parameters(use_default: bool = False):
 
     if use_default:
         motor_arm = D["motor_arm"]
-        print(f"Długość ramienia (od środka do rotoru): {motor_arm} m")
+        print(f"Dlugosc ramienia (od srodka do rotoru): {motor_arm} m")
     else:
-        motor_arm = input_float("Długość ramienia (od środka do rotoru) [m]", D["motor_arm"])
+        motor_arm = input_float("Dlugosc ramienia (od srodka do rotoru) [m]", D["motor_arm"])
 
     print("\n--- Wymiary korpusu drona ---")
 
     if use_default:
         body_length = D["body_length"]
-        print(f"Długość korpusu: {body_length} m")
+        print(f"Dlugosc korpusu: {body_length} m")
     else:
-        body_length = input_float("Długość korpusu [m]", D["body_length"])
+        body_length = input_float("Dlugosc korpusu [m]", D["body_length"])
 
     if use_default:
         body_width = D["body_width"]
-        print(f"Szerokość korpusu: {body_width} m")
+        print(f"Szerokosc korpusu: {body_width} m")
     else:
-        body_width = input_float("Szerokość korpusu [m]", D["body_width"])
+        body_width = input_float("Szerokosc korpusu [m]", D["body_width"])
 
     if use_default:
         body_height = D["body_height"]
-        print(f"Wysokość korpusu: {body_height} m")
+        print(f"Wysokosc korpusu: {body_height} m")
     else:
-        body_height = input_float("Wysokość korpusu [m]", D["body_height"])
+        body_height = input_float("Wysokosc korpusu [m]", D["body_height"])
 
     if use_default:
         CD_0 = D["CD_0"]
         print(f"CD_0: {CD_0}")
     else:
-        CD_0 = input_float("Współczynnik oporu CD_0", D["CD_0"])
+        CD_0 = input_float("Wspolczynnik oporu CD_0", D["CD_0"])
 
     if use_default:
         k_torque = D["k_torque"]
         print(f"k_torque: {k_torque}")
     else:
-        k_torque = input_float("Współczynnik momentu śmigła k_torque", D["k_torque"])
+        k_torque = input_float("Wspolczynnik momentu smigla k_torque", D["k_torque"])
 
     if use_default:
         tau = D["tau"]
         print(f"TAU: {tau} s")
     else:
-        tau = input_float("Stała czasowa silnika TAU [s]", D["tau"])
+        tau = input_float("Stala czasowa silnika TAU [s]", D["tau"])
 
-    print("\n--- Współczynniki tłumienia ---")
+    print("\n--- Wspolczynniki tlumienia ---")
 
     if use_default:
         C_Lp = D["C_Lp"]
         print(f"C_Lp: {C_Lp}")
     else:
-        C_Lp = input_float("Współczynnik tłumienia roll C_Lp", D["C_Lp"])
+        C_Lp = input_float("Wspolczynnik tlumienia roll C_Lp", D["C_Lp"])
 
     if use_default:
         CM_Q = D["CM_Q"]
         print(f"CM_Q: {CM_Q}")
     else:
-        CM_Q = input_float("Współczynnik tłumienia pitch CM_Q", D["CM_Q"])
+        CM_Q = input_float("Wspolczynnik tlumienia pitch CM_Q", D["CM_Q"])
 
     if use_default:
         C_Nr = D["C_Nr"]
         print(f"C_Nr: {C_Nr}")
     else:
-        C_Nr = input_float("Współczynnik tłumienia yaw C_Nr", D["C_Nr"])
+        C_Nr = input_float("Wspolczynnik tlumienia yaw C_Nr", D["C_Nr"])
 
     return (mass, mass_engine, motor_arm,
             body_length, body_width, body_height,
@@ -195,81 +196,77 @@ def drone_parameters(use_default: bool = False):
 
 def limits(use_default: bool = False):
     L = DEFAULTS_LIMITS
-    print("\nLIMITY FIZYCZNE DRONA\n--- Limity ciągu [N] ---")
-
-    # thrust_max / thrust_min jeśli będzie potrzebne można dodać z input_float
-
-    print("\n--- Limity prędkości kątowych [°/s] ---")
+    print("\nLIMITY FIZYCZNE DRONA\n--- Limity predkosci katowych [deg/s] ---")
 
     if use_default:
         max_pitch_rate_deg = L["max_pitch_rate_deg"]
-        print(f"Maksymalna prędkość pitch: {max_pitch_rate_deg} °/s")
+        print(f"Maksymalna predkosc pitch: {max_pitch_rate_deg} deg/s")
     else:
-        max_pitch_rate_deg = input_float("Maksymalna prędkość pitch [°/s]", L["max_pitch_rate_deg"])
+        max_pitch_rate_deg = input_float("Maksymalna predkosc pitch [deg/s]", L["max_pitch_rate_deg"])
     max_pitch_rate_rad = np.deg2rad(max_pitch_rate_deg)
 
     if use_default:
         max_roll_rate_deg = L["max_roll_rate_deg"]
-        print(f"Maksymalna prędkość roll: {max_roll_rate_deg} °/s")
+        print(f"Maksymalna predkosc roll: {max_roll_rate_deg} deg/s")
     else:
-        max_roll_rate_deg = input_float("Maksymalna prędkość roll [°/s]", L["max_roll_rate_deg"])
+        max_roll_rate_deg = input_float("Maksymalna predkosc roll [deg/s]", L["max_roll_rate_deg"])
     max_roll_rate_rad = np.deg2rad(max_roll_rate_deg)
 
     if use_default:
         max_yaw_rate_deg = L["max_yaw_rate_deg"]
-        print(f"Maksymalna prędkość yaw: {max_yaw_rate_deg} °/s")
+        print(f"Maksymalna predkosc yaw: {max_yaw_rate_deg} deg/s")
     else:
-        max_yaw_rate_deg = input_float("Maksymalna prędkość yaw [°/s]", L["max_yaw_rate_deg"])
+        max_yaw_rate_deg = input_float("Maksymalna predkosc yaw [deg/s]", L["max_yaw_rate_deg"])
     max_yaw_rate_rad = np.deg2rad(max_yaw_rate_deg)
 
-    print("\n--- Limity kątów [°] ---")
+    print("\n--- Limity katow [deg] ---")
 
     if use_default:
         max_theta_angle_deg = L["max_theta_angle_deg"]
-        print(f"Maksymalny kąt (theta): {max_theta_angle_deg} °")
+        print(f"Maksymalny kat (theta): {max_theta_angle_deg} deg")
     else:
-        max_theta_angle_deg = input_float("Maksymalny kąt (theta) [°]", L["max_theta_angle_deg"])
+        max_theta_angle_deg = input_float("Maksymalny kat (theta) [deg]", L["max_theta_angle_deg"])
     max_theta_angle_rad = np.deg2rad(max_theta_angle_deg)
 
     if use_default:
         max_phi_angle_deg = L["max_phi_angle_deg"]
-        print(f"Maksymalny kąt (phi): {max_phi_angle_deg} °")
+        print(f"Maksymalny kat (phi): {max_phi_angle_deg} deg")
     else:
-        max_phi_angle_deg = input_float("Maksymalny kąt (phi) [°]", L["max_phi_angle_deg"])
+        max_phi_angle_deg = input_float("Maksymalny kat (phi) [deg]", L["max_phi_angle_deg"])
     max_phi_angle_rad = np.deg2rad(max_phi_angle_deg)
 
     if use_default:
         max_psi_angle_deg = L["max_psi_angle_deg"]
-        print(f"Maksymalny kąt (psi): {max_psi_angle_deg} °")
+        print(f"Maksymalny kat (psi): {max_psi_angle_deg} deg")
     else:
-        max_psi_angle_deg = input_float("Maksymalny kąt (psi) [°]", L["max_psi_angle_deg"])
+        max_psi_angle_deg = input_float("Maksymalny kat (psi) [deg]", L["max_psi_angle_deg"])
     max_psi_angle_rad = np.deg2rad(max_psi_angle_deg)
 
-    print("\n--- Limity prędkości liniowych [m/s] ---")
+    print("\n--- Limity predkosci liniowych [m/s] ---")
 
     if use_default:
         max_horizontal_vel = L["max_horizontal_vel"]
-        print(f"Maksymalna prędkość pozioma: {max_horizontal_vel} m/s")
+        print(f"Maksymalna predkosc pozioma: {max_horizontal_vel} m/s")
     else:
-        max_horizontal_vel = input_float("Maksymalna prędkość pozioma [m/s]", L["max_horizontal_vel"])
+        max_horizontal_vel = input_float("Maksymalna predkosc pozioma [m/s]", L["max_horizontal_vel"])
 
     if use_default:
         max_ascent = L["max_ascent"]
-        print(f"Maksymalna prędkość wznoszenia: {max_ascent} m/s")
+        print(f"Maksymalna predkosc wznoszenia: {max_ascent} m/s")
     else:
-        max_ascent = input_float("Maksymalna prędkość wznoszenia [m/s]", L["max_ascent"])
+        max_ascent = input_float("Maksymalna predkosc wznoszenia [m/s]", L["max_ascent"])
 
     if use_default:
         max_descent = L["max_descent"]
-        print(f"Maksymalna prędkość opadania: {max_descent} m/s")
+        print(f"Maksymalna predkosc opadania: {max_descent} m/s")
     else:
-        max_descent = input_float("Maksymalna prędkość opadania [m/s]", L["max_descent"])
+        max_descent = input_float("Maksymalna predkosc opadania [m/s]", L["max_descent"])
 
     if use_default:
         max_descent_tilted = L["max_descent_tilted"]
-        print(f"Maks. prędkość opadania (z przechyłem): {max_descent_tilted} m/s")
+        print(f"Maks. predkosc opadania (z przechylem): {max_descent_tilted} m/s")
     else:
-        max_descent_tilted = input_float("Maks. prędkość opadania (z przechyłem) [m/s]", L["max_descent_tilted"])
+        max_descent_tilted = input_float("Maks. predkosc opadania (z przechylem) [m/s]", L["max_descent_tilted"])
 
     return (max_pitch_rate_rad, max_roll_rate_rad, max_yaw_rate_rad,
             max_theta_angle_rad, max_phi_angle_rad, max_psi_angle_rad,
@@ -283,37 +280,37 @@ def control_parameters(use_default: bool = False):
         Q_velocity_x = C["Q_velocity_x"]
         print(f"Q vx: {Q_velocity_x}")
     else:
-        Q_velocity_x = input_float("Waga dla prędkości (vx)", C["Q_velocity_x"])
+        Q_velocity_x = input_float("Waga dla predkosci (vx)", C["Q_velocity_x"])
 
     if use_default:
         Q_velocity_y = C["Q_velocity_y"]
         print(f"Q vy: {Q_velocity_y}")
     else:
-        Q_velocity_y = input_float("Waga dla prędkości (vy)", C["Q_velocity_y"])
+        Q_velocity_y = input_float("Waga dla predkosci (vy)", C["Q_velocity_y"])
 
     if use_default:
         Q_velocity_z = C["Q_velocity_z"]
         print(f"Q vz: {Q_velocity_z}")
     else:
-        Q_velocity_z = input_float("Waga dla prędkości (vz)", C["Q_velocity_z"])
+        Q_velocity_z = input_float("Waga dla predkosci (vz)", C["Q_velocity_z"])
 
     if use_default:
         Q_angular_rate_p = C["Q_angular_rate_p"]
         print(f"Q p: {Q_angular_rate_p}")
     else:
-        Q_angular_rate_p = input_float("Waga dla prędkości kątowej (p)", C["Q_angular_rate_p"])
+        Q_angular_rate_p = input_float("Waga dla predkosci katowej (p)", C["Q_angular_rate_p"])
 
     if use_default:
         Q_angular_rate_q = C["Q_angular_rate_q"]
         print(f"Q q: {Q_angular_rate_q}")
     else:
-        Q_angular_rate_q = input_float("Waga dla prędkości kątowej (q)", C["Q_angular_rate_q"])
+        Q_angular_rate_q = input_float("Waga dla predkosci katowej (q)", C["Q_angular_rate_q"])
 
     if use_default:
         Q_angular_rate_r = C["Q_angular_rate_r"]
         print(f"Q r: {Q_angular_rate_r}")
     else:
-        Q_angular_rate_r = input_float("Waga dla prędkości kątowej (r)", C["Q_angular_rate_r"])
+        Q_angular_rate_r = input_float("Waga dla predkosci katowej (r)", C["Q_angular_rate_r"])
 
     if use_default:
         Q_position_X = C["Q_position_X"]
@@ -337,25 +334,25 @@ def control_parameters(use_default: bool = False):
         Q_phi = C["Q_phi"]
         print(f"Q phi: {Q_phi}")
     else:
-        Q_phi = input_float("Waga dla kątów (phi)", C["Q_phi"])
+        Q_phi = input_float("Waga dla katow (phi)", C["Q_phi"])
 
     if use_default:
         Q_theta = C["Q_theta"]
         print(f"Q theta: {Q_theta}")
     else:
-        Q_theta = input_float("Waga dla kątów (theta)", C["Q_theta"])
+        Q_theta = input_float("Waga dla katow (theta)", C["Q_theta"])
 
     if use_default:
         Q_psi = C["Q_psi"]
         print(f"Q psi: {Q_psi}")
     else:
-        Q_psi = input_float("Waga dla kątów (psi)", C["Q_psi"])
+        Q_psi = input_float("Waga dla katow (psi)", C["Q_psi"])
 
     if use_default:
         Q_thrust = C["Q_thrust"]
         print(f"Q thrust: {Q_thrust}")
     else:
-        Q_thrust = input_float("Waga dla ciągów (T1-T4, dla n=16)", C["Q_thrust"])
+        Q_thrust = input_float("Waga dla ciagow (T1-T4, dla n=16)", C["Q_thrust"])
 
     if use_default:
         R_weight = C["R_weight"]
@@ -368,10 +365,10 @@ def control_parameters(use_default: bool = False):
             Q_position_X, Q_position_Y, Q_position_Z,
             Q_phi, Q_theta, Q_psi, Q_thrust, R_weight)
 
-def flight_parameters(use_default: bool = False,roof_start_alt: float | None = None,roof_end_alt: float | None = None):
+def environment_parameters(use_default: bool = False):
 
     F = DEFAULTS_FLIGHT
-    print("\nPARAMETRY LOTU")
+    print("\nPARAMETRY ŚRODOWISKA")
 
     if use_default:
         g = F["g"]
@@ -381,113 +378,115 @@ def flight_parameters(use_default: bool = False,roof_start_alt: float | None = N
 
     if use_default:
         RO_0 = F["RO_0"]
-        print(f"Gęstość powietrza: {RO_0} kg/m^3")
+        print(f"Gestosc powietrza: {RO_0} kg/m^3")
     else:
-        RO_0 = input_float("Gęstość powietrza [kg/m^3]", F["RO_0"])
-
-    if use_default:
-        velocity = F["velocity"]
-        print(f"Prędkość referencyjna: {velocity} m/s")
-    else:
-        velocity = input_float("Prędkość referencyjna drona [m/s]", F["velocity"])
-
-    print("\n--- Wysokości lotu ---")
-
-    print("\n--- Wysokości lotu ---")
-
-    # START
-    if roof_start_alt is not None:
-        # użytkownik wcześniej zaakceptował start z dachu
-        altitude_start = roof_start_alt
-        print(f"Wysokość startowa: {altitude_start} m (z dachu budynku)")
-    else:
-        if use_default:
-            altitude_start = F["altitude_start"]
-            print(f"Wysokość startowa: {altitude_start} m")
-        else:
-            altitude_start = input_float("Wysokość startowa [m]", F["altitude_start"])
-
-    # PRZELOT – bez zmian
-    if use_default:
-        altitude_cruise_min = F["altitude_cruise_min"]
-        print(f"Wysokość przelotowa min: {altitude_cruise_min} m")
-    else:
-        altitude_cruise_min = input_float("Wysokość przelotowa min [m]", F["altitude_cruise_min"])
-
-    if use_default:
-        altitude_cruise_max = F["altitude_cruise_max"]
-        print(f"Wysokość przelotowa max: {altitude_cruise_max} m")
-    else:
-        altitude_cruise_max = input_float("Wysokość przelotowa max [m]", F["altitude_cruise_max"])
-
-    # KONIEC
-    if roof_end_alt is not None:
-        # użytkownik wcześniej zaakceptował lądowanie na dachu
-        altitude_end = roof_end_alt
-        print(f"Wysokość lądowania: {altitude_end} m (z dachu budynku)")
-    else:
-        if use_default:
-            altitude_end = F["altitude_end"]
-            print(f"Wysokość lądowania: {altitude_end} m")
-        else:
-            altitude_end = input_float("Wysokość lądowania [m]", F["altitude_end"])
-
-    if use_default:
-        avoid_distance = F["avoid_distance"]
-        print(f"Bezpieczna odległość: {avoid_distance} m")
-    else:
-        avoid_distance = input_float("Bezpieczna odległość [m]", F["avoid_distance"])
+        RO_0 = input_float("Gestosc powietrza [kg/m^3]", F["RO_0"])
 
     print("\n--- Turbulencje i wiatr ---")
 
     if use_default:
         ax_wind = F["ax_wind"]
-        print(f"ax_wind: {ax_wind} m/s²")
+        print(f"ax_wind: {ax_wind} m/s^2")
     else:
-        ax_wind = input_float("Przyspieszenie wiatru poziomego [m/s²]", F["ax_wind"])
+        ax_wind = input_float("Przyspieszenie wiatru poziomego [m/s^2]", F["ax_wind"])
 
     if use_default:
         ay_wind = F["ay_wind"]
-        print(f"ay_wind: {ay_wind} m/s²")
+        print(f"ay_wind: {ay_wind} m/s^2")
     else:
-        ay_wind = input_float("Przyspieszenie wiatru poprzecznego [m/s²]", F["ay_wind"])
+        ay_wind = input_float("Przyspieszenie wiatru poprzecznego [m/s^2]", F["ay_wind"])
 
     if use_default:
         az_wind = F["az_wind"]
-        print(f"az_wind: {az_wind} m/s²")
+        print(f"az_wind: {az_wind} m/s^2")
     else:
-        az_wind = input_float("Przyspieszenie wiatru pionowego [m/s²]", F["az_wind"])
+        az_wind = input_float("Przyspieszenie wiatru pionowego [m/s^2]", F["az_wind"])
 
     if use_default:
         c_turb = F["c_turb"]
         print(f"c_turb: {c_turb}")
     else:
-        c_turb = input_float("Siła turbulencji c_turb", F["c_turb"])
+        c_turb = input_float("Sila turbulencji c_turb", F["c_turb"])
 
     if use_default:
-        x_turb_1 = F["x_turb_1"]
-        print(f"Początek strefy turbulencji: {x_turb_1} m")
+        s_turb_start = F["s_turb_start"]
+        print(f"Poczatek strefy turbulencji (dystans wzdluz trasy): {s_turb_start} m")
     else:
-        x_turb_1 = input_float("Początek strefy turbulencji [m]", F["x_turb_1"])
+        s_turb_start = input_float("Poczatek strefy turbulencji [m dystansu]", F["s_turb_start"])
 
     if use_default:
-        x_turb_2 = F["x_turb_2"]
-        print(f"Koniec strefy turbulencji: {x_turb_2} m")
+        s_turb_end = F["s_turb_end"]
+        print(f"Koniec strefy turbulencji (dystans wzdluz trasy): {s_turb_end} m")
     else:
-        x_turb_2 = input_float("Koniec strefy turbulencji [m]", F["x_turb_2"])
+        s_turb_end = input_float("Koniec strefy turbulencji [m dystansu]", F["s_turb_end"])
+
+
+    return (g, RO_0, ax_wind, ay_wind, az_wind, c_turb, s_turb_start, s_turb_end)
+
+def flight_parameters(use_default: bool = False, roof_start_alt: float | None = None, roof_end_alt: float | None = None):
+
+    F = DEFAULTS_FLIGHT
+    print("\nPARAMETRY LOTU")
+
+    if use_default:
+        velocity = F["velocity"]
+        print(f"Predkosc referencyjna: {velocity} m/s")
+    else:
+        velocity = input_float("Predkosc referencyjna drona [m/s]", F["velocity"])
+
+    print("\n--- Wysokosci lotu ---")
+
+    # START
+    if roof_start_alt is not None:
+        altitude_start = roof_start_alt
+        print(f"Wysokosc startowa: {altitude_start} m (z dachu budynku)")
+    else:
+        if use_default:
+            altitude_start = F["altitude_start"]
+            print(f"Wysokosc startowa: {altitude_start} m")
+        else:
+            altitude_start = input_float("Wysokosc startowa [m]", F["altitude_start"])
+
+    # PRZELOT
+    if use_default:
+        altitude_cruise_min = F["altitude_cruise_min"]
+        print(f"Wysokosc przelotowa min: {altitude_cruise_min} m")
+    else:
+        altitude_cruise_min = input_float("Wysokosc przelotowa min [m]", F["altitude_cruise_min"])
+
+    if use_default:
+        altitude_cruise_max = F["altitude_cruise_max"]
+        print(f"Wysokosc przelotowa max: {altitude_cruise_max} m")
+    else:
+        altitude_cruise_max = input_float("Wysokosc przelotowa max [m]", F["altitude_cruise_max"])
+
+    # KONIEC
+    if roof_end_alt is not None:
+        altitude_end = roof_end_alt
+        print(f"Wysokosc ladowania: {altitude_end} m (na dachu budynku)")
+    else:
+        if use_default:
+            altitude_end = F["altitude_end"]
+            print(f"Wysokosc ladowania: {altitude_end} m")
+        else:
+            altitude_end = input_float("Wysokosc ladowania [m]", F["altitude_end"])
+
+    if use_default:
+        avoid_distance = F["avoid_distance"]
+        print(f"Bezpieczna odleglosc od budynku: {avoid_distance} m")
+    else:
+        avoid_distance = input_float("Bezpieczna odleglosc [m]", F["avoid_distance"])
 
     if use_default:
         engine_on = F["engine_on"]
-        print(f"Silniki włączone na starcie: {'tak' if engine_on else 'nie'}")
+        print(f"Silniki wlaczone na starcie: {'tak' if engine_on else 'nie'}")
     else:
         engine_on = input_yes_no(
-            f"Start na wysokości {altitude_start} m. Silniki włączone?",
+            f"Start na wysokosci {altitude_start} m. Silniki wlaczone?",
             F["engine_on"]
         )
 
-    return (g, RO_0, velocity,
-            altitude_start, altitude_cruise_min, altitude_cruise_max, altitude_end,
-            avoid_distance, ax_wind, ay_wind, az_wind, c_turb, x_turb_1, x_turb_2, engine_on)
+    return velocity,altitude_start, altitude_cruise_min, altitude_cruise_max, altitude_end, avoid_distance, engine_on
 
 def path_analise_parameters(use_default: bool = False):
     P = DEFAULTS_PATH
@@ -496,12 +495,12 @@ def path_analise_parameters(use_default: bool = False):
     if use_default:
         include_thrust_dynamics = P["include_thrust_dynamics"]
         n = 16 if include_thrust_dynamics else 12
-        print(f"Model: {'z dynamiką (n=16)' if include_thrust_dynamics else 'prosty (n=12)'}")
+        print(f"Model: {'z dynamika (n=16)' if include_thrust_dynamics else 'prosty (n=12)'}")
     else:
-        print("\nCzy uwzględnić dynamikę silników?")
-        print("  t/tak - model z dynamiką (n=16, dokładniejszy)")
-        print("  n/nie - model prosty (n=12, szybszy)")
-        include_thrust_dynamics = input_yes_no("Wybór", True)
+        print("\nCzy uwzglednic dynamike silnikow?")
+        print("  t/tak - model z dynamika (n=16)")
+        print("  n/nie - model prosty (n=12)")
+        include_thrust_dynamics = input_yes_no("Wybor", True)
         if include_thrust_dynamics:
             n = 16
         else:
@@ -509,8 +508,7 @@ def path_analise_parameters(use_default: bool = False):
 
     m = P["m"]
     if use_default:
-        print(f"Liczba silników (m): {m}")
-
+        print(f"Liczba silnikow (m): {m}")
 
     if use_default:
         dt = P["dt"]
@@ -520,9 +518,9 @@ def path_analise_parameters(use_default: bool = False):
 
     if use_default:
         grid_resolution = P["grid_resolution"]
-        print(f"Rozdzielczość grid: {grid_resolution}")
+        print(f"Rozdzielczosc grid: {grid_resolution}")
     else:
-        grid_resolution = input_float("Podaj rozdzielczość siatki", P["grid_resolution"])
+        grid_resolution = input_float("Podaj rozdzielczosc siatki (im mniejsza tym większa ilość obliczeń)", P["grid_resolution"])
 
     t = P["t"]
 
@@ -530,38 +528,49 @@ def path_analise_parameters(use_default: bool = False):
 
 def input_parameters(roof_start_alt=None, roof_end_alt=None):
     """
-        Główna funkcja konfiguracji – wszystko ląduje w obiekcie config.
-        Jeśli roof_start_alt / roof_end_alt są podane, nadpisują wysokości z DEFAULTS_FLIGHT.
-        """
-    use_custom = input_yes_no("Czy chcesz wpisać własne dane [domyślne]?", False)
-    use_default = not use_custom
-
+    Glowna funkcja konfiguracji - wszystko laduje w obiekcie config.
+    Jesli roof_start_alt / roof_end_alt sa podane, nadpisuja wysokosci z DEFAULTS_FLIGHT.
+    """
     # === PARAMETRY FIZYCZNE DRONA ===
+    use_custom_drone = input_yes_no("Czy chcesz wpisac wlasne PARAMETRY FIZYCZNE DRONA [domyslne]?", False)
+    use_default_drone = not use_custom_drone
     (mass, mass_engine, motor_arm, body_length, body_width, body_height,
-     CD_0, k_torque, tau, C_Lp, CM_Q, C_Nr) = drone_parameters(use_default)  # lub drone_parameters
+     CD_0, k_torque, tau, C_Lp, CM_Q, C_Nr) = drone_parameters(use_default_drone)
 
     # === LIMITY DRONA ===
+    print("\n" + "="*80)
+    use_custom_limits = input_yes_no("Czy chcesz wpisac wlasne LIMITY DRONA [domyslne]?", False)
+    use_default_limits = not use_custom_limits
     (max_pitch_rate, max_roll_rate, max_yaw_rate,
      max_theta_angle_rad, max_phi_angle_rad, max_psi_angle_rad,
-     max_horizontal_vel, max_ascent, max_descent, max_descent_tilted) = limits(use_default)
+     max_horizontal_vel, max_ascent, max_descent, max_descent_tilted) = limits(use_default_limits)
 
     # === PARAMETRY STEROWANIA ===
+    print("\n" + "="*80)
+    use_custom_control = input_yes_no("Czy chcesz wpisac wlasne PARAMETRY STEROWANIA (LQR) [domyslne]?", False)
+    use_default_control = not use_custom_control
     (Q_velocity_x, Q_velocity_y, Q_velocity_z,
-     Q_angular_rate_p, Q_angular_rate_r, Q_angular_rate_q,  # dostosuj kolejność do swojej wersji
+     Q_angular_rate_p, Q_angular_rate_q, Q_angular_rate_r,
      Q_position_X, Q_position_Y, Q_position_Z,
-     Q_phi, Q_theta, Q_psi, Q_thrust, R_weight) = control_parameters(use_default)
+     Q_phi, Q_theta, Q_psi, Q_thrust, R_weight) = control_parameters(use_default_control)
 
-    # === PARAMETRY LOTU ===
-    (g, RO_0, velocity, altitude_start, altitude_cruise_min, altitude_cruise_max,
-     altitude_end, avoid_distance, ax_wind, ay_wind, az_wind, c_turb,
-     x_turb_1, x_turb_2, engine_on) = flight_parameters(
-        use_default,
-        roof_start_alt=roof_start_alt,
-        roof_end_alt=roof_end_alt
-    )
+    # === PARAMETRY ŚRODOWISKA ===
+    print("\n" + "="*80)
+    use_custom_environment = input_yes_no("Czy chcesz wpisac wlasne PARAMETRY ŚRODOWISKA (wiatr, turbulencje) [domyslne]?", False)
+    use_default_environment = not use_custom_environment
+    g, RO_0, ax_wind, ay_wind, az_wind, c_turb, s_turb_start, s_turb_end = environment_parameters(use_default_environment)
+
+    #=== PARAMETRY LOTU  ===
+    print("\n" + "="*80)
+    use_custom_flight = input_yes_no("Czy chcesz wpisac wlasne PARAMETRY LOTU (prędkość, wysokości) [domyslne]?", False)
+    use_default_flight = not use_custom_flight
+    velocity, altitude_start, altitude_cruise_min, altitude_cruise_max, altitude_end, avoid_distance, engine_on = flight_parameters(use_default_flight, roof_start_alt, roof_end_alt)
 
     # === PARAMETRY ANALIZY TRAJEKTORII ===
-    n, include_thrust_dynamics, m, t, dt, grid_resolution = path_analise_parameters(use_default)
+    print("\n" + "="*80)
+    use_custom_path = input_yes_no("Czy chcesz wpisac wlasne PARAMETRY ANALIZY TRAJEKTORII (krok czasowy, siatka) [domyslne]?", False)
+    use_default_path = not use_custom_path
+    n, include_thrust_dynamics, m, t, dt, grid_resolution = path_analise_parameters(use_default_path)
 
     # === ZAPIS DO CONFIG ===
     config.set_params(
@@ -580,7 +589,7 @@ def input_parameters(roof_start_alt=None, roof_end_alt=None):
         CM_Q=CM_Q,
         C_Nr=C_Nr,
 
-        # Lot – TU JUŻ SĄ OSTATECZNE WYSOKOŚCI
+        # Lot
         g=g,
         RO_0=RO_0,
         velocity=velocity,
@@ -593,21 +602,21 @@ def input_parameters(roof_start_alt=None, roof_end_alt=None):
         ay_wind=ay_wind,
         az_wind=az_wind,
         c_turb=c_turb,
-        x_turb_1=x_turb_1,
-        x_turb_2=x_turb_2,
+        x_turb_1=s_turb_start,  # Backward compatibility
+        x_turb_2=s_turb_end,
         engine_on=engine_on,
 
-        # Limity prędkości kątowych
+        # Limity predkosci katowych
         max_pitch_rate_rad=max_pitch_rate,
         max_roll_rate_rad=max_roll_rate,
         max_yaw_rate_rad=max_yaw_rate,
 
-        # Limity kątów
+        # Limity katow
         max_theta_angle_rad=max_theta_angle_rad,
         max_phi_angle_rad=max_phi_angle_rad,
         max_psi_angle_rad=max_psi_angle_rad,
 
-        # Limity prędkości liniowych
+        # Limity predkosci liniowych
         max_horizontal_vel=max_horizontal_vel,
         max_ascent=max_ascent,
         max_descent=max_descent,
@@ -638,7 +647,7 @@ def input_parameters(roof_start_alt=None, roof_end_alt=None):
         grid_resolution=grid_resolution,
     )
 
-    print(f"Momenty bezwładności (IX, IY, IZ) = ({config.IX:.2f}, {config.IY:.2f}, {config.IZ:.2f})")
+    print(f"Momenty bezwladnosci (IX, IY, IZ) = ({config.IX:.2f}, {config.IY:.2f}, {config.IZ:.2f})")
 
 
 if __name__ == "__main__":

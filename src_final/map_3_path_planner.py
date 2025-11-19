@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 from heapq import heappush, heappop
 import matplotlib.pyplot as plt
-from geo_utils import create_transformer, wgs84_to_local, local_to_wgs84, estimate_building_height
+from map_geo_utils import create_transformer, wgs84_to_local, local_to_wgs84, estimate_building_height
 import time
 
 DATA_DIR = Path("data")
@@ -377,7 +377,7 @@ class DroneRoutePlanner:
                 path.reverse()
 
                 t_elapsed = time.time() - t_start
-                print(f"\n Znaleziono ścieżkę!")
+                #print(f"\n Znaleziono ścieżkę!")
                 print(f"Czas: {t_elapsed:.2f}s")
                 print(f"Węzły przeszukane: {nodes_explored:,}")
                 print(f"Długość ścieżki: {len(path)} punktów")
@@ -445,10 +445,10 @@ class DroneRoutePlanner:
         smoothed_indices = [meters_to_idx(coord) for coord in smoothed]
 
         t_elapsed = time.time() - t_start
-        print(f"\n[Path Smoothing]")
-        print(f"Czas: {t_elapsed:.2f}s")
-        print(f"Punkty przed: {len(path_indices)}, po: {len(smoothed_indices)}")
-        print(f"Redukcja: {100 * (1 - len(smoothed_indices) / len(path_indices)):.1f}%")
+        # print(f"\n[Path Smoothing]")
+        # print(f"Czas: {t_elapsed:.2f}s")
+        # print(f"Punkty przed: {len(path_indices)}, po: {len(smoothed_indices)}")
+        # print(f"Redukcja: {100 * (1 - len(smoothed_indices) / len(path_indices)):.1f}%")
 
         return smoothed_indices
 
@@ -477,17 +477,17 @@ class DroneRoutePlanner:
         takeoff_waypoints = []
         x_s, y_s, _ = start_pos
 
-        print(f"\n[Vertical Segments]")
-        print(f"Start altitude: {start_alt:.2f}m")
-        print(f"Cruise min: {cruise_min:.2f}m")
-        print(f"Cruise max: {cruise_max:.2f}m")
-        print(f"End altitude: {end_alt:.2f}m")
+        # print(f"\n[Vertical Segments]")
+        # print(f"Start altitude: {start_alt:.2f}m")
+        # print(f"Cruise min: {cruise_min:.2f}m")
+        # print(f"Cruise max: {cruise_max:.2f}m")
+        # print(f"End altitude: {end_alt:.2f}m")
 
         # Jeśli start_alt różni się od cruise_min, dodaj segment pionowy
         if start_alt < cruise_min - 0.1 or start_alt > cruise_max + 0.1:
             target_alt = max(min(start_alt, cruise_max), cruise_min)  # ogranicz do zakresu
             num_steps = max(int(abs(target_alt - start_alt) / resolution) + 1, 3)
-            print(f"Dodaję {num_steps} punktów startu: {start_alt:.2f}m -> {target_alt:.2f}m")
+            # print(f"Dodaję {num_steps} punktów startu: {start_alt:.2f}m -> {target_alt:.2f}m")
 
             for i in range(num_steps + 1):
                 t = i / num_steps
@@ -497,8 +497,8 @@ class DroneRoutePlanner:
                 iz = int(z / resolution)
                 if 0 <= ix < grid.shape[0] and 0 <= iy < grid.shape[1] and 0 <= iz < grid.shape[2]:
                     takeoff_waypoints.append((ix, iy, iz))
-        else:
-            print(f"Start już w zakresie przelotowym - brak segmentu pionowego")
+        #else:
+            #print(f"Start już w zakresie przelotowym - brak segmentu pionowego")
 
         # ======================
         # LĄDOWANIE (na ziemię ALBO na dach)
@@ -510,7 +510,7 @@ class DroneRoutePlanner:
         if end_alt < cruise_min - 0.1 or end_alt > cruise_max + 0.1:
             target_alt = max(min(end_alt, cruise_max), cruise_min)
             num_steps = max(int(abs(end_alt - target_alt) / resolution) + 1, 3)
-            print(f"Dodaję {num_steps} punktów lądowania: {target_alt:.2f}m -> {end_alt:.2f}m")
+            #print(f"Dodaję {num_steps} punktów lądowania: {target_alt:.2f}m -> {end_alt:.2f}m")
 
             for i in range(num_steps + 1):
                 t = i / num_steps
@@ -520,8 +520,8 @@ class DroneRoutePlanner:
                 iz = int(z / resolution)
                 if 0 <= ix < grid.shape[0] and 0 <= iy < grid.shape[1] and 0 <= iz < grid.shape[2]:
                     landing_waypoints.append((ix, iy, iz))
-        else:
-            print(f"Koniec już w zakresie przelotowym - brak segmentu pionowego")
+        #else:
+            #print(f"Koniec już w zakresie przelotowym - brak segmentu pionowego")
 
         # ======================
         # ZŁOŻENIE CAŁEJ ŚCIEŻKI
@@ -539,9 +539,8 @@ class DroneRoutePlanner:
         if landing_waypoints:
             full_path.extend(landing_waypoints)
 
-        print(
-            f"Punkty trasy: start={len(takeoff_waypoints)}, cruise={len(smoothed_path)}, landing={len(landing_waypoints)}")
-        print(f"Całkowita liczba punktów: {len(full_path)}")
+        # print(f"Punkty trasy: start={len(takeoff_waypoints)}, cruise={len(smoothed_path)}, landing={len(landing_waypoints)}")
+        # print(f"Całkowita liczba punktów: {len(full_path)}")
 
         return full_path
 
@@ -587,13 +586,8 @@ class DroneRoutePlanner:
 
     def plan(self, point_a, point_b):
         """
-        Główna funkcja planowania trasy - ULEPSZONA
-
-        POPRAWKA: Używa roof_start_alt i roof_end_alt zamiast config.altitude_start/end
+        Główna funkcja planowania trasy
         """
-        print("\n" + "=" * 70)
-        print("PLANOWANIE TRASY DRONA - WERSJA ULEPSZONA")
-        print("=" * 70)
 
         t_total_start = time.time()
 
@@ -721,9 +715,9 @@ class DroneRoutePlanner:
                 int(cruise_alt / res)
             )
 
-            print(f"\n[Planowanie ścieżki]")
-            print(f"Start: {start_idx} @ {cruise_alt:.1f}m AGL")
-            print(f"Cel:   {goal_idx} @ {cruise_alt:.1f}m AGL")
+            # print(f"\n[Planowanie ścieżki]")
+            # print(f"Start: {start_idx} @ {cruise_alt:.1f}m AGL")
+            # print(f"Cel:   {goal_idx} @ {cruise_alt:.1f}m AGL")
 
             nx, ny, nz = grid.shape
 
@@ -740,17 +734,17 @@ class DroneRoutePlanner:
             path_raw = self._astar_3d_enhanced(grid, start_idx, goal_idx, bounds)
 
             if path_raw is not None:
-                print(f"\n✓ Znaleziono ścieżkę ze strategią {strategy_idx + 1}!")
+                print(f" Znaleziono ścieżkę ze strategią {strategy_idx + 1}!")
 
                 # Zapisz parametry użyte do znalezienia ścieżki
                 self.used_cruise_min = cruise_min
                 self.used_cruise_max = cruise_max
                 break
             else:
-                print(f"\n✗ Nie znaleziono ścieżki ze strategią {strategy_idx + 1}")
+                print(f"\ Nie znaleziono ścieżki ze strategią {strategy_idx + 1}")
 
         if path_raw is None:
-            print("\n✗ Nie znaleziono ścieżki mimo prób z różnymi strategiami!")
+            print("\n Nie znaleziono ścieżki mimo prób z różnymi strategiami!")
             print(f"Spróbuj wybrać inne punkty lub zwiększyć wysokość lotu w konfiguracji.")
             return None
 

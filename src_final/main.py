@@ -6,7 +6,7 @@ from config_parameters import input_parameters
 from config import config
 import pickle
 import pandas as pd
-from geo_utils import get_building_height_at_point
+from map_geo_utils import get_building_height_at_point
 from map_1_data import download_street_network, download_buildings, DATA_DIR, select_city
 from map_2_select_points import MapABSelector
 from map_3_path_planner import DroneRoutePlanner
@@ -98,7 +98,6 @@ def section_1_data_management():
 
         else:
             print("Nieprawidłowa odpowiedź. Wpisz 't' (tak) lub 'n' (nie).")
-
 
 def section_2_route_planning(G, buildings, city_id):
     """
@@ -261,22 +260,12 @@ def section_3_drone_configuration(roof_start_alt=None, roof_end_alt=None):
     input_parameters(roof_start_alt=roof_start_alt,
                      roof_end_alt=roof_end_alt)
 
-    print("\n[CONFIG] Ustawione wysokości lotu:")
-    print(f"  altitude_start = {config.altitude_start:.1f} m")
-    print(f"  altitude_end   = {config.altitude_end:.1f} m")
-
 def section_4_path_planning(point_a, point_b, buildings, city_id, roof_start_alt=None, roof_end_alt=None):
-    """
-    SEKCJA 4: Planowanie ścieżki.
-    Teraz wysokości są brane WYŁĄCZNIE z config.altitude_start / altitude_end.
-    roof_* tylko ustawiają flagi, że wolno startować/lądować na dachu.
-    """
 
-    # Flagi: czy dopuszczamy start/lądowanie na dachu
+    #Dopuszczenie startu z dachu
     config.allow_start_inside_building = roof_start_alt is not None
     config.allow_end_inside_building = roof_end_alt is not None
 
-    print("\nSEKCJA 4 – Planowanie trasy")
     print(f"  Start:  {point_a}")
     print(f"  Koniec: {point_b}")
     print(f"  Wysokość startu  (config): {config.altitude_start:.1f} m")
@@ -305,7 +294,8 @@ def main():
     print(f"4. Planowanie ścieżki 3D z omijaniem budynków")
     print(f"5. Symulacja lotu z wizualizacją")
 
-    print("Wciśnij 'Enter' aby użyć domyślnej konfiguracji ukazanej w nawiasie kwadratowym []")
+    print("\nWciśnij 'Enter' aby użyć domyślnej konfiguracji ukazanej w nawiasie kwadratowym []")
+    print("Aby przejść dalej należy zamknąć wykres")
 
     print_header("SEKCJA 1: WYBÓR MIASTA I DANE OPENSTREETMAP")
     G, buildings, city_id = section_1_data_management()
@@ -316,15 +306,17 @@ def main():
     print_header("SEKCJA 2: WYBÓR PUNKTÓW A i B NA MAPIE")
     point_a, point_b, roof_start_alt, roof_end_alt = section_2_route_planning(G, buildings, city_id)
 
+    print_header("SEKCJA 3: PARAMETRY DRONA")
     section_3_drone_configuration(roof_start_alt, roof_end_alt)
 
+    print("SEKCJA 4: PLANOWANIE TRASY")
     path_result = section_4_path_planning(point_a, point_b, buildings, city_id, roof_start_alt=roof_start_alt, roof_end_alt=roof_end_alt)
 
     if path_result is None:
-        print("\nNie udało się wyznaczyć trasy – pomijam symulację LQR.")
+        print("Nie udało się wyznaczyć trasy – pomijam symulację LQR.")
         return
 
-    print_header("SEKCJA 5: STEROWANIE DRONA Z LQR")
+    print_header("SEKCJA 5: STEROWANIE DRONA Z LQR ORAZ SYMULACJA")
     dron_lqr(path_result)
 
 

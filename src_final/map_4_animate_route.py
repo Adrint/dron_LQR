@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from shapely.geometry import LineString
-from geo_utils import wgs84_to_local, local_to_wgs84, estimate_building_height
+from map_geo_utils import wgs84_to_local, local_to_wgs84, estimate_building_height
 from config import config
 
 
@@ -44,10 +44,9 @@ class DroneLiveAnimator:
         self.counter = 0
         self.interval = 3  # Aktualizuj co N kroków
 
-        # POPRAWKA: Zapamiętaj rzeczywiste wysokości z trasy
+        # Rzeczywiste wysokości z trasy
         self.altitude_start = 0.0
         self.altitude_end = 0.0
-        self.path_z_values = None  # Tablica wysokości z zaplanowanej trasy
 
     def initialize(self, path_result, fig=None, gridspec=None):
         """
@@ -78,20 +77,15 @@ class DroneLiveAnimator:
 
         dist_total = path_result['distance']
 
-        # POPRAWKA: Zapisz rzeczywiste wysokości startu i lądowania z trasy
+        # Zapisz rzeczywiste wysokości startu i lądowania z trasy
         self.altitude_start = Z_agl[0]  # Pierwsza wysokość na trasie
         self.altitude_end = Z_agl[-1]   # Ostatnia wysokość na trasie
-        self.path_z_values = Z_agl.copy()  # Zachowaj całą trasę
 
-        print(f"\n[Animator] Inicjalizacja wykresów")
+        print(f"\n[Animator] Inicjalizacja wykresow")
         print(f"Punkty: {len(X)}")
         print(f"Dystans: {dist_total:.1f} m")
-        print(f"Wysokość startowa: {self.altitude_start:.2f} m")
-        print(f"Wysokość lądowania: {self.altitude_end:.2f} m")
-
-        # ===================================================================
-        # SKOPIOWANE 1:1 Z _plot_3d_path_straight()
-        # ===================================================================
+        print(f"Wysokosc startowa: {self.altitude_start:.2f} m")
+        print(f"Wysokosc ladowania: {self.altitude_end:.2f} m")
 
         # Wczytaj budynki w obszarze (DOKŁADNIE JAK W MAP_3)
         buildings_in = None
@@ -108,7 +102,7 @@ class DroneLiveAnimator:
                 ]
                 print(f"Budynki w obszarze: {len(buildings_in)}")
             except Exception as e:
-                print(f"Błąd ładowania budynków: {e}")
+                print(f"Blad ladowania budynkow: {e}")
                 buildings_in = None
 
         # Oblicz kąt rotacji dla widoku z góry (DOKŁADNIE JAK W MAP_3)
@@ -121,27 +115,21 @@ class DroneLiveAnimator:
         self.sin_rot = s_rot
         self.xa_rot = c * xa - s_rot * ya
 
-        # ===================================================================
         # UTWORZENIE FIGURY (3 SUBPLOTY)
-        # ===================================================================
-
         self.fig = plt.figure(figsize=(16, 8))
         self.gs = self.fig.add_gridspec(2, 2, height_ratios=[1, 1], width_ratios=[1.2, 1.0])
         self.ax1 = self.fig.add_subplot(self.gs[:, 0], projection='3d')
         self.ax2 = self.fig.add_subplot(self.gs[0, 1])  # prawa górna
         self.ax3 = self.fig.add_subplot(self.gs[1, 1])  # prawa dolna
 
-        # ===================================================================
         # WYKRES 1: 3D - SKOPIOWANE 1:1
-        # ===================================================================
-
         self.ax1.set_facecolor("#f0f0f0")
 
         # Trasa planowana
         self.ax1.plot(X, Y, Z_agl, 'r-', linewidth=2.5,
                      label=f'Trasa ({dist_total:.0f} m)', zorder=50)
 
-        # POPRAWKA: Start i cel z rzeczywistymi wysokościami
+        # Start i cel z rzeczywistymi wysokościami
         self.ax1.scatter(
             [xa], [ya], [self.altitude_start],
             c='green', s=150, marker='o',
@@ -230,16 +218,13 @@ class DroneLiveAnimator:
 
         self.ax1.set_xlabel('X [m]')
         self.ax1.set_ylabel('Y [m]')
-        self.ax1.set_zlabel('Wysokość [m]')
-        self.ax1.set_title('Trasa 3D (X, Y, wysokość)')
+        self.ax1.set_zlabel('Wysokosc [m]')
+        self.ax1.set_title('Trasa 3D (X, Y, wysokosc)')
         self.ax1.legend(loc='upper left')
         self.ax1.view_init(elev=20, azim=250)
         self.ax1.grid(True, alpha=0.3)
 
-        # ===================================================================
         # WYKRES 2: WIDOK Z GÓRY - SKOPIOWANE 1:1
-        # ===================================================================
-
         self.ax2.set_facecolor("#f9f9f9")
 
         # Budynki (JAK W MAP_3)
@@ -292,7 +277,7 @@ class DroneLiveAnimator:
 
         self.ax2.set_xlabel("X [m]")
         self.ax2.set_ylabel("Y [m]")
-        self.ax2.set_title("Widok z góry: układ lokalny X–Y")
+        self.ax2.set_title("Widok z gory: uklad lokalny X-Y")
         self.ax2.grid(True, alpha=0.3, linestyle="--")
 
         # Granice (JAK W MAP_3)
@@ -301,10 +286,7 @@ class DroneLiveAnimator:
         self.ax2.set_ylim(min(Y.min(), ya, yb) - margin_xy, max(Y.max(), ya, yb) + margin_xy)
         self.ax2.set_aspect('equal', adjustable='box')
 
-        # ===================================================================
         # WYKRES 3: PROFIL WYSOKOŚCI - SKOPIOWANE 1:1
-        # ===================================================================
-
         self.ax3.set_facecolor("#f9f9f9")
 
         # Budynki pod trasą (JAK W MAP_3)
@@ -354,10 +336,10 @@ class DroneLiveAnimator:
                     except:
                         continue
             except Exception as e:
-                print(f"[Profil wysokości] {e}")
+                print(f"[Profil wysokosci] {e}")
 
-        # POPRAWKA: Trasa z rzeczywistymi wysokościami
-        self.ax3.plot(s, Z_agl, 'r-', linewidth=3, label='Wysokość trasy', zorder=100)
+        # Trasa z rzeczywistymi wysokościami
+        self.ax3.plot(s, Z_agl, 'r-', linewidth=3, label='Wysokosc trasy', zorder=100)
         self.ax3.scatter([0], [self.altitude_start],
                          c='green', s=80, marker='o',
                          edgecolor='black', linewidth=2,
@@ -376,16 +358,13 @@ class DroneLiveAnimator:
                       "  B", fontsize=12, fontweight="bold")
 
         self.ax3.set_xlabel('Dystans [m]')
-        self.ax3.set_ylabel('Wysokość [m]')
-        self.ax3.set_title('Profil wysokości')
+        self.ax3.set_ylabel('Wysokosc [m]')
+        self.ax3.set_title('Profil wysokosci')
         self.ax3.grid(True, alpha=0.3, linestyle="--")
         self.ax3.set_xlim(-50, s_end + 50)
         self.ax3.set_ylim(bottom=-2)
 
-        # ===================================================================
         # DODAJ MARKERY DRONA (na początku niewidoczne)
-        # ===================================================================
-
         # 3D
         self.drone_3d, = self.ax1.plot([], [], [], 'bo', markersize=12,
                                        markeredgecolor='black', markeredgewidth=2.5,
@@ -410,13 +389,12 @@ class DroneLiveAnimator:
         # Aktualizuj legendy
         self.ax1.legend(loc='upper left')
 
-
         plt.tight_layout()
         plt.ion()
         plt.show(block=False)
         plt.pause(0.001)
 
-        print("  ✓ Wykresy gotowe")
+        #print("Wykresy gotowe")
 
     def update(self, x_state, t, step):
         """Aktualizuj pozycję drona na wykresach."""
@@ -470,7 +448,7 @@ class DroneLiveAnimator:
 
     def close(self):
         """Zamknij animator."""
-        print(f"\n[Animator] Koniec - zapisano {len(self.hist_x)} punktów")
+        print(f"\n[Animator] Koniec - zapisano {len(self.hist_x)} punktow")
         if len(self.hist_s) > 0:
             print(f"Dystans: {self.hist_s[-1]:.1f} m")
         plt.ioff()

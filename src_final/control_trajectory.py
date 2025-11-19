@@ -1,11 +1,8 @@
 import numpy as np
 from pathlib import Path
-import pandas as pd
 
 # Ścieżki plików
 PLANNED_PATH = Path("planned_path.npz")
-DATA_DIR = Path("data")
-BUILDINGS_FILE = DATA_DIR / "warsaw_buildings.pkl"
 
 
 def _generate_from_planned(Vel, dt, avoid_distance):
@@ -18,7 +15,7 @@ def _generate_from_planned(Vel, dt, avoid_distance):
     Z_planned = data['Z_ref']  # Współrzędne Z w NED (ujemne dla wysokości)
     X_planned = data['X_ref']  # Współrzędne X (dla map/wizualizacji)
 
-    print(f"\n[Trajectory] Wczytano ścieżkę z {PLANNED_PATH}")
+    print(f"\n[Trajectory] Wczytano sciezke z {PLANNED_PATH}")
     print(f"  Punkty: {len(s_planned)}")
     print(f"  Dystans: 0 -> {s_planned[-1]:.1f} m")
 
@@ -101,9 +98,9 @@ def generate_reference_profile(Vel, dt, avoid_distance):
         try:
             return _generate_from_planned(Vel, dt, avoid_distance)
         except Exception as e:
-            print(f"[trajectory] ⚠️ Błąd wczytywania planned_path.npz: {e}")
-            print("[trajectory] Używam profilu syntetycznego.")
+            print(f"[trajectory] Blad wczytywania planned_path.npz: {e}")
+            print("[trajectory] Uzywam profilu syntetycznego.")
     else:
-        print(f"[trajectory] ⚠️ Brak pliku {PLANNED_PATH}. Używam profilu syntetycznego.")
+        print(f"[trajectory] Brak pliku {PLANNED_PATH}. Uzywam profilu syntetycznego.")
 
     return _generate_synthetic(Vel, dt, avoid_distance)

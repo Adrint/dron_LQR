@@ -1,4 +1,3 @@
-import json
 import pickle
 from pathlib import Path
 
@@ -9,12 +8,10 @@ import osmnx as ox
 import pandas as pd
 from geopy.distance import geodesic
 from shapely.geometry import LineString
-from geo_utils import create_transformer, wgs84_to_local, estimate_building_height
+from map_geo_utils import create_transformer, wgs84_to_local, estimate_building_height
 
 # === USTAWIENIA ===
 DATA_DIR = Path("data")
-OUT_POINTS = Path("selected_points.json")
-OUT_BBOX = Path("bbox_info.json")
 
 COLORS = {
     "road": "#999999",
@@ -45,29 +42,28 @@ class MapABSelector:
 
     def load_data(self):
         if self.G is not None:
-            print(f" Sieć drogowa (przekazana): {len(self.G.nodes):,} węzłów")
+            print(f"Siec drogowa (przekazana): {len(self.G.nodes):,} wezlow")
         else:
-            # fallback – tylko jeśli nie przekazano G
+            # fallback - tylko jeśli nie przekazano G
             street_path = DATA_DIR / f"{self.city_id}_street_network.pkl"
             if not street_path.exists():
-                print(f"  Brak pliku: {street_path}")
-                print(f"  Uruchom program główny lub pobierz dane dla miasta: {self.city_id}")
+                print(f"Brak pliku: {street_path}")
+                print(f"Uruchom program glowny lub pobierz dane dla miasta: {self.city_id}")
                 return False
             with open(street_path, "rb") as f:
                 self.G = pickle.load(f)
-            print(f" Sieć drogowa (z pliku): {len(self.G.nodes):,} węzłów")
+            print(f"Siec drogowa (z pliku): {len(self.G.nodes):,} wezlow")
 
         if self.buildings is None:
             bldg_path = DATA_DIR / f"{self.city_id}_buildings.pkl"
             if bldg_path.exists():
                 self.buildings = pd.read_pickle(bldg_path)
-                print(f" Budynki: {len(self.buildings):,}")
+                print(f"Budynki: {len(self.buildings):,}")
             else:
-                print(f" Brak pliku z budynkami dla miasta: {self.city_id}")
-                print("  Rysunek profilu będzie bez zabudowy")
+                print(f"Brak pliku z budynkami dla miasta: {self.city_id}")
+                print("Rysunek profilu bedzie bez zabudowy")
 
         return True
-
 
     def create_map(self):
         self.fig, self.ax = ox.plot_graph(
@@ -90,11 +86,11 @@ class MapABSelector:
                 edgecolor="darkgray",
                 linewidth=0.3,
                 legend=True,
-                legend_kwds={"label": "Wysokość [m]", "shrink": 0.8},
+                legend_kwds={"label": "Wysokosc [m]", "shrink": 0.8},
             )
 
         self.ax.set_title(
-            "TRYB ZOOM: Użyj narzędzi na pasku.\nNaciśnij SPACJĘ aby wejść w tryb zaznaczania.",
+            "TRYB ZOOM: Uzyj narzedzi na pasku.\nNacisnij SPACJE aby wejsc w tryb zaznaczania.",
             color="blue",
             fontweight="bold",
             fontsize=11,
@@ -106,9 +102,9 @@ class MapABSelector:
         if event.key == " ":
             self.selection_mode = not self.selection_mode
             if self.selection_mode:
-                self.ax.set_title("TRYB ZAZNACZANIA: kliknij A, potem B\nZamknij wykres aby przejść dalej", color="green", fontweight="bold")
+                self.ax.set_title("TRYB ZAZNACZANIA: kliknij A, potem B\nZamknij wykres aby przejsc dalej", color="green", fontweight="bold")
             else:
-                self.ax.set_title("TRYB ZOOM: naciśnij SPACJĘ aby zaznaczać", color="blue", fontweight="bold")
+                self.ax.set_title("TRYB ZOOM: nacisnij SPACJE aby zaznaczac", color="blue", fontweight="bold")
             self.fig.canvas.draw_idle()
 
     def on_click(self, event):
@@ -125,15 +121,14 @@ class MapABSelector:
         self.ax.text(lon, lat, f"  {label}", fontsize=13, fontweight="bold", zorder=1000)
         self.fig.canvas.draw_idle()
 
-
     def show_yx_zx(self):
         if len(self.points) != 2:
-            print("Nie wybrano punktów A i B")
+            print("Nie wybrano punktow A i B")
             return None
 
         a, b = self.points
         dist_ab = geodesic(a, b).meters
-        print(f"Odległość A–B: {dist_ab:.2f} m")
+        print(f"Odleglosc A-B: {dist_ab:.2f} m")
 
         margin_m = 100.0
         margin_deg = margin_m / 111000.0
@@ -176,7 +171,7 @@ class MapABSelector:
         y_max = y_center + y_span
 
         fig, (ax_top, ax_bottom) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
-        fig.text(0.99, 0.01, "Zamknij wykres aby przejść dalej",
+        fig.text(0.99, 0.01, "Zamknij wykres aby przejsc dalej",
                  ha='right', va='bottom', fontsize=11, color='gray')
 
         ax_top.set_aspect("equal", adjustable="datalim")
@@ -218,8 +213,7 @@ class MapABSelector:
         ax_top.text(0, ya_r, "  A", fontsize=13, fontweight="bold")
         ax_top.text(dist_total, yb_r, "  B", fontsize=13, fontweight="bold")
         ax_top.set_ylabel("Y [m]")
-        #ax_top.set_xlabel("Dystans [m]")
-        ax_top.set_title("Widok z góry na trasę")
+        ax_top.set_title("Widok z gory na trase")
         ax_top.grid(True, alpha=0.3, linestyle="--")
         ax_top.set_xlim(-50, dist_total + 50)
         ax_top.set_ylim(y_min, y_max)
@@ -272,11 +266,11 @@ class MapABSelector:
                           zorder=50)
         ax_bottom.scatter([dist_total], [0], color=COLORS["point_b"], s=120, marker="o", edgecolor="black", linewidth=2,
                           zorder=50)
-        ax_bottom.text(0, ya_r, "  A", fontsize=13, fontweight="bold")
-        ax_bottom.text(dist_total, yb_r, "  B", fontsize=13, fontweight="bold")
+        ax_bottom.text(0, 0, "  A", fontsize=13, fontweight="bold")
+        ax_bottom.text(dist_total, 0, "  B", fontsize=13, fontweight="bold")
         ax_bottom.set_xlabel("Dystans [m]")
-        ax_bottom.set_ylabel("Wysokość [m]")
-        ax_bottom.set_title("Profil wysokości zabudowy wzdłuż trasy")
+        ax_bottom.set_ylabel("Wysokosc [m]")
+        ax_bottom.set_title("Profil wysokosci zabudowy wzdluz trasy")
         ax_bottom.grid(True, alpha=0.3, linestyle="--")
         ax_bottom.set_ylim(bottom=-2, top=max_h * 1.15)
         ax_bottom.set_xlim(-50, dist_total + 50)
@@ -285,14 +279,6 @@ class MapABSelector:
         plt.show()
         plt.pause(5)
 
-        with open(OUT_POINTS, "w", encoding="utf-8") as f:
-            json.dump({"A": {"lat": a[0], "lon": a[1]}, "B": {"lat": b[0], "lon": b[1]}}, f, ensure_ascii=False,
-                      indent=2)
-        with open(OUT_BBOX, "w", encoding="utf-8") as f:
-            json.dump({"distance_m": dist_ab, "bbox": bbox}, f, ensure_ascii=False, indent=2)
-
-        print(f" Zapisano punkty do {OUT_POINTS}")
-        print(f" Zapisano metadane do {OUT_BBOX}")
         return {"A": a, "B": b, "distance_m": dist_ab}
 
     def run(self):
