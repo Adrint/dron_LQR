@@ -1,0 +1,51 @@
+# System Symulacji Drona - Wymagane pakiety Python
+# Autor: Adam Nowak
+# Politechnika Warszawska
+
+# ============================================
+# Podstawowe biblioteki numeryczne i naukowe
+# ============================================
+numpy>=1.21.0,<2.0.0
+scipy>=1.7.0,<2.0.0
+matplotlib>=3.4.0,<4.0.0
+pandas>=1.3.0,<3.0.0
+
+# ============================================
+# Dane geograficzne i mapy
+# ============================================
+# OSMnx - pobieranie danych OpenStreetMap
+osmnx>=1.2.0,<2.0.0
+
+# GeoPandas - operacje na danych geograficznych
+geopandas>=0.10.0,<1.0.0
+
+# Shapely - geometria i operacje przestrzenne
+shapely>=1.8.0,<3.0.0
+
+# Geopy - obliczenia geodezyjne
+geopy>=2.2.0,<3.0.0
+
+# PyProj - transformacje ukladow wspolrzednych
+pyproj>=3.3.0,<4.0.0
+
+# ============================================
+# HTTP i siec (dla OSMnx)
+# ============================================
+requests>=2.26.0,<3.0.0
+
+# ============================================
+# Uwagi dotyczace instalacji
+# ============================================
+# 
+# Windows:
+# - W przypadku problemow z geopandas/fiona mozna uzyc:
+#   pip install pipwin
+#   pipwin install gdal
+#   pipwin install fiona
+#
+# Linux/Mac:
+# - pip install -r requirements.txt
+#
+# Minimalne wymagania:
+# - Python 3.8 lub nowszy
+# - pip 21.0 lub nowszy

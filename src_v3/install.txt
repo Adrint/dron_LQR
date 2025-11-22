@@ -1,0 +1,210 @@
+@echo off
+REM Skrypt instalacyjny dla Windows - System Symulacji Drona
+
+echo ========================================
+echo  Instalacja: System Symulacji Drona
+echo  Adam Nowak - Politechnika Warszawska
+echo ========================================
+echo.
+
+REM Sprawdz Python
+echo [1/6] Sprawdzam Python...
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Python nie jest zainstalowany!
+    echo.
+    echo Pobierz Python 3.8 lub nowszy z:
+    echo https://www.python.org/downloads/
+    echo.
+    echo WAZNE: Podczas instalacji zaznacz:
+    echo   [X] Add Python to PATH
+    echo.
+    pause
+    exit /b 1
+)
+
+for /f "tokens=*" %%i in ('python --version') do set PYTHON_VER=%%i
+echo [OK] %PYTHON_VER%
+
+REM Sprawdz pip
+echo.
+echo [2/6] Sprawdzam pip...
+python -m pip --version >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] pip nie jest zainstalowany!
+    echo Instaluje pip...
+    python -m ensurepip --upgrade
+    if errorlevel 1 (
+        echo [ERROR] Nie udalo sie zainstalowac pip
+        pause
+        exit /b 1
+    )
+)
+echo [OK] pip dostepny
+
+REM Sprawdz strukture katalogow
+echo.
+echo [3/6] Sprawdzam strukture projektu...
+if not exist "src_final\" (
+    echo [ERROR] Brak katalogu src_final!
+    echo.
+    echo Upewnij sie ze znajdujesz sie w glownym katalogu projektu.
+    echo Struktura powinna wygladac tak:
+    echo   projekt/
+    echo     ├── install.bat
+    echo     ├── run.bat
+    echo     ├── requirements.txt
+    echo     └── src_final/
+    echo           └── main.py
+    pause
+    exit /b 1
+)
+
+if not exist "src_final\main.py" (
+    echo [ERROR] Brak pliku src_final\main.py!
+    pause
+    exit /b 1
+)
+echo [OK] Struktura projektu poprawna
+
+REM Utworz srodowisko wirtualne
+echo.
+echo [4/6] Tworze srodowisko wirtualne...
+if exist "venv\" (
+    echo [WARN] Katalog venv juz istnieje
+    set /p response=Czy chcesz go usunac i utworzyc ponownie? (t/n) [n]: 
+    if /i "%response%"=="t" (
+        echo Usuwam stare srodowisko...
+        rd /s /q venv
+        python -m venv venv
+        if errorlevel 1 (
+            echo [ERROR] Nie udalo sie utworzyc srodowiska
+            pause
+            exit /b 1
+        )
+        echo [OK] Utworzono nowe srodowisko
+    ) else (
+        echo [OK] Uzywam istniejacego srodowiska
+    )
+) else (
+    python -m venv venv
+    if errorlevel 1 (
+        echo [ERROR] Nie udalo sie utworzyc srodowiska
+        pause
+        exit /b 1
+    )
+    echo [OK] Utworzono srodowisko wirtualne
+)
+
+REM Aktywuj srodowisko
+echo.
+echo [5/6] Aktywuje srodowisko wirtualne...
+call venv\Scripts\activate.bat
+if errorlevel 1 (
+    echo [ERROR] Nie udalo sie aktywowac srodowiska
+    pause
+    exit /b 1
+)
+echo [OK] Srodowisko aktywne
+
+REM Upgrade pip w srodowisku
+echo.
+echo Aktualizuje pip w srodowisku wirtualnym...
+python -m pip install --upgrade pip --quiet
+echo [OK] pip zaktualizowany
+
+REM Instalacja zaleznosci
+echo.
+echo [6/6] Instaluje zaleznosci (moze to chwile potrwac)...
+echo.
+echo Pakiety do zainstalowania:
+type requirements.txt | findstr /v "^#" | findstr /v "^$"
+echo.
+
+echo Instalowanie pakietow podstawowych...
+pip install numpy scipy matplotlib pandas --quiet
+if errorlevel 1 (
+    echo [WARN] Blad instalacji pakietow podstawowych
+)
+
+echo Instalowanie pakietow geograficznych...
+pip install pyproj geopy shapely --quiet
+if errorlevel 1 (
+    echo [WARN] Blad instalacji pakietow geograficznych
+)
+
+echo Instalowanie geopandas i osmnx...
+pip install geopandas osmnx --quiet
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Wystapily bledy podczas instalacji
+    echo.
+    echo Sprobuj recznej instalacji:
+    echo   venv\Scripts\activate
+    echo   pip install -r requirements.txt
+    echo.
+    echo Dla Windows mozna tez sprobowac:
+    echo   pip install pipwin
+    echo   pipwin install gdal
+    echo   pipwin install fiona
+    pause
+    exit /b 1
+)
+
+echo Instalowanie pozostalych pakietow...
+pip install requests --quiet
+
+echo [OK] Wszystkie pakiety zainstalowane
+
+REM Weryfikacja importow
+echo.
+echo Weryfikuje kluczowe moduły...
+python -c "import numpy; print('[OK] numpy')" 2>nul
+python -c "import matplotlib; print('[OK] matplotlib')" 2>nul
+python -c "import scipy; print('[OK] scipy')" 2>nul
+python -c "import pandas; print('[OK] pandas')" 2>nul
+python -c "import osmnx; print('[OK] osmnx')" 2>nul
+python -c "import geopandas; print('[OK] geopandas')" 2>nul
+python -c "import shapely; print('[OK] shapely')" 2>nul
+python -c "import geopy; print('[OK] geopy')" 2>nul
+
+echo.
+echo [OK] Wszystkie kluczowe moduły dostepne
+
+REM Utworz katalog data
+echo.
+echo Przygotowuje katalogi robocze...
+if not exist "src_final\data\" (
+    mkdir src_final\data
+    echo [OK] Utworzono katalog src_final\data
+) else (
+    echo [OK] Katalog src_final\data istnieje
+)
+
+if not exist "data\" (
+    mkdir data
+    echo [OK] Utworzono katalog data
+) else (
+    echo [OK] Katalog data istnieje
+)
+
+REM Podsumowanie
+echo.
+echo ========================================
+echo  Instalacja zakonczona pomyslnie!
+echo ========================================
+echo.
+echo Aby uruchomic program:
+echo.
+echo   Opcja 1 - Skrypt (zalecane):
+echo     run.bat
+echo.
+echo   Opcja 2 - Recznie:
+echo     1. venv\Scripts\activate
+echo     2. cd src_final
+echo     3. python main.py
+echo.
+echo UWAGA: Przy pierwszym uruchomieniu program pobierze
+echo        dane map z OpenStreetMap (wymaga internetu)
+echo.
+pause
