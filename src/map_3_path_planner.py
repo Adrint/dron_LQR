@@ -264,6 +264,11 @@ class DroneRoutePlanner:
         nx, ny, nz = grid.shape
         x_min, x_max, y_min, y_max, z_min, z_max = bounds
 
+        # Pobiera rozdzielczość siatki i zakres wysokości przelotowych z konfiguracji
+        resolution = self.config.grid_resolution
+        cruise_min = self.config.altitude_cruise_min
+        cruise_max = self.config.altitude_cruise_max
+
         def heuristic(a, b):
             dx = abs(a[0] - b[0])
             dy = abs(a[1] - b[1])
@@ -305,11 +310,37 @@ class DroneRoutePlanner:
             return dist <= cylinder_radius
 
         def get_neighbors(node):
-            """18 kierunków: 6 głównych + 12 ukośnych"""
+            """
+            Generuje węzły sąsiednie z systemem kar wysokościowych.
+            18 kierunków: 6 głównych + 12 ukośnych
+            """
             x, y, z = node
             neighbors = []
 
-            # 6 głównych kierunków (koszt 1.0)
+            def altitude_penalty(z_idx):
+                """
+                Oblicza karę za latanie poza preferowanym zakresem wysokości.
+
+                Parametry:
+                    z_idx: indeks wysokości w siatce
+
+                Zwraca:
+                    Wartość kary (0.0 jeśli w zakresie, >0 jeśli poza zakresem)
+                """
+                # Konwertuje indeks siatki na rzeczywistą wysokość w metrach
+                actual_alt = z_idx * resolution
+
+                # Jeśli wysokość mieści się w zakresie przelotowym - brak kary
+                if cruise_min <= actual_alt <= cruise_max:
+                    return 0.0
+                # Jeśli powyżej maksymalnej wysokości - duża kara (2.0 za każdy metr)
+                elif actual_alt > cruise_max:
+                    return 10.0 * (actual_alt - cruise_max)
+                # Jeśli poniżej minimalnej wysokości - umiarkowana kara (1.0 za każdy metr)
+                else:
+                    return 10.0 * (cruise_min - actual_alt)
+
+            # 6 głównych kierunków (koszt bazowy 1.0 + kara wysokościowa)
             for dx, dy, dz in [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)]:
                 nx_new = x + dx
                 ny_new = y + dy
@@ -319,9 +350,13 @@ class DroneRoutePlanner:
                     if grid[nx_new, ny_new, nz_new] == 0:
                         neighbor = (nx_new, ny_new, nz_new)
                         if in_search_space(neighbor):
-                            neighbors.append((neighbor, 1.0))
+                            # Oblicza całkowity koszt: koszt bazowy + kara wysokościowa
+                            base_cost = 1.0
+                            height_penalty = altitude_penalty(nz_new)
+                            total_cost = base_cost + height_penalty
+                            neighbors.append((neighbor, total_cost))
 
-            # 12 ukośnych kierunków (koszt sqrt(2) ≈ 1.414)
+            # 12 ukośnych kierunków (koszt bazowy sqrt(2) lub sqrt(3) + kara wysokościowa)
             diagonal_dirs = [
                 (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),  # poziome ukośne
                 (1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1),  # XZ ukośne
@@ -337,12 +372,16 @@ class DroneRoutePlanner:
                     if grid[nx_new, ny_new, nz_new] == 0:
                         neighbor = (nx_new, ny_new, nz_new)
                         if in_search_space(neighbor):
-                            # Preferuj ruch poziomy (mniejszy koszt dla ruchu w XY)
+                            # Preferuje ruch poziomy (mniejszy koszt dla ruchu w XY)
                             if dz == 0:
-                                cost = 1.414
+                                base_cost = 1.414  # sqrt(2)
                             else:
-                                cost = 1.732  # sqrt(3) dla ruchu z pionową składową
-                            neighbors.append((neighbor, cost))
+                                base_cost = 1.732  # sqrt(3) dla ruchu z pionową składową
+
+                            # Dodaje karę wysokościową do kosztu bazowego
+                            height_penalty = altitude_penalty(nz_new)
+                            total_cost = base_cost + height_penalty
+                            neighbors.append((neighbor, total_cost))
 
             return neighbors
 
@@ -377,7 +416,7 @@ class DroneRoutePlanner:
                 path.reverse()
 
                 t_elapsed = time.time() - t_start
-                #print(f"\n Znaleziono ścieżkę!")
+                # print(f"\n Znaleziono ścieżkę!")
                 print(f"Czas: {t_elapsed:.2f}s")
                 print(f"Węzły przeszukane: {nodes_explored:,}")
                 print(f"Długość ścieżki: {len(path)} punktów")
@@ -497,8 +536,8 @@ class DroneRoutePlanner:
                 iz = int(z / resolution)
                 if 0 <= ix < grid.shape[0] and 0 <= iy < grid.shape[1] and 0 <= iz < grid.shape[2]:
                     takeoff_waypoints.append((ix, iy, iz))
-        #else:
-            #print(f"Start już w zakresie przelotowym - brak segmentu pionowego")
+        # else:
+        # print(f"Start już w zakresie przelotowym - brak segmentu pionowego")
 
         # ======================
         # LĄDOWANIE (na ziemię ALBO na dach)
@@ -510,7 +549,7 @@ class DroneRoutePlanner:
         if end_alt < cruise_min - 0.1 or end_alt > cruise_max + 0.1:
             target_alt = max(min(end_alt, cruise_max), cruise_min)
             num_steps = max(int(abs(end_alt - target_alt) / resolution) + 1, 3)
-            #print(f"Dodaję {num_steps} punktów lądowania: {target_alt:.2f}m -> {end_alt:.2f}m")
+            # print(f"Dodaję {num_steps} punktów lądowania: {target_alt:.2f}m -> {end_alt:.2f}m")
 
             for i in range(num_steps + 1):
                 t = i / num_steps
@@ -520,8 +559,8 @@ class DroneRoutePlanner:
                 iz = int(z / resolution)
                 if 0 <= ix < grid.shape[0] and 0 <= iy < grid.shape[1] and 0 <= iz < grid.shape[2]:
                     landing_waypoints.append((ix, iy, iz))
-        #else:
-            #print(f"Koniec już w zakresie przelotowym - brak segmentu pionowego")
+        # else:
+        # print(f"Koniec już w zakresie przelotowym - brak segmentu pionowego")
 
         # ======================
         # ZŁOŻENIE CAŁEJ ŚCIEŻKI
@@ -670,12 +709,19 @@ class DroneRoutePlanner:
             {"margin": 500, "altitude_offset": 0},
             {"margin": 500, "altitude_offset": 5},
             {"margin": 500, "altitude_offset": 10},
+            {"margin": 500, "altitude_offset": 20},
+            {"margin": 500, "altitude_offset": 50},
+            {"margin": 500, "altitude_offset": 100},
             {"margin": 1000, "altitude_offset": 0},
             {"margin": 1000, "altitude_offset": 5},
             {"margin": 1000, "altitude_offset": 10},
             {"margin": 1500, "altitude_offset": 0},
             {"margin": 1500, "altitude_offset": 5},
             {"margin": 1500, "altitude_offset": 10},
+            {"margin": 1500, "altitude_offset": 50},
+            {"margin": 1500, "altitude_offset": 100},
+            {"margin": 3000, "altitude_offset": 50},
+            {"margin": 3000, "altitude_offset": 100},
         ]
 
         path_raw = None

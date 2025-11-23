@@ -46,6 +46,15 @@ def section_instruction():
     print("Wykresy 3D również można obracać")
     print("Aby kontynuować działanie programu, należy zamknąć okno z wykresem.")
     print()
+    print("Planowanie trasy".center(80))
+    print("1  -  Pobrane dane potrzebne do wygenerowania miasta zostaną zapisane w folderze 'data',\n\t  dzięki czemu przy ponownym uruchomieniu programu nie będzie konieczne ich ponowne pobieranie.")
+    print("2  -  Większy rozmiar siatki (gridu) wydłuża czas planowania trasy.")
+    print("3  -  Proponowane dwa punkty dla Warszawy zostały dobrane na podstawie czasu potrzebnego do wyznaczenia trasy.")
+    print("4  -  Wybór mniejszego miasta (np. Pionki) skutkuje szybszym pobieraniem danych i sprawniejszym działaniem programu.")
+    print("5  -  Po wizualizacji wysokości zabudowy na trasie warto rozważyć dopasowanie wysokości przelotowej, aby przyspieszyć planowanie trasy.")
+    print("*  -  Od autora: zalecam wybranie punktów oddalonych od siebie w niewielkiej odległości, np. 20 budynków między nimi.")
+    print("** -  Program czasem potrzebuje chwili na przetworzenie danych, ale wciąż działa poprawnie.\n")
+
 
     # --- pętla potwierdzenia zapoznania się z instrukcją ---
     while True:

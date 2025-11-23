@@ -213,7 +213,7 @@ class MapABSelector:
         ax_top.text(0, ya_r, "  A", fontsize=13, fontweight="bold")
         ax_top.text(dist_total, yb_r, "  B", fontsize=13, fontweight="bold")
         ax_top.set_ylabel("Y [m]")
-        ax_top.set_title("Widok z gory na trase")
+        ax_top.set_title("Widok z góry na trase")
         ax_top.grid(True, alpha=0.3, linestyle="--")
         ax_top.set_xlim(-50, dist_total + 50)
         ax_top.set_ylim(y_min, y_max)
